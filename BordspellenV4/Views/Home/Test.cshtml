@@ -1,0 +1,36 @@
+﻿@using Domain.Models;
+
+@model IQueryable<Game>
+@{
+    ViewBag.Title = "View games";
+}
+
+<div class="text-center p-2">
+    <h2 class="text-center">Lijst van de games</h2>
+    <table class="table table-bordered table-striped table-sm">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Adult</th>
+                <th>Genre</th>
+                <th>Picture</th>
+                <th>Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Game r in Model ?? Enumerable.Empty<Game>())
+            {
+                    <tr>
+                    @r.Name
+                    @r.Description
+                    @r.Adult
+                    @r.Genre
+                    @r.Picture
+                    @r.Type
+                    </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
