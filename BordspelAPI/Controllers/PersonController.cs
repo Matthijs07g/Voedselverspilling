@@ -1,5 +1,6 @@
 ﻿using Domain.Models;
 using Domain.Models.Enums;
+using Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BordspelAPI.Controllers
@@ -8,34 +9,41 @@ namespace BordspelAPI.Controllers
     [Route("[controller]")]
     public class PersonController : ControllerBase
     {
+        private IPersonRepository _personRepository;
+
+        public PersonController(IPersonRepository personRepository)
+        {
+            _personRepository = personRepository ?? throw new ArgumentNullException(nameof(personRepository));
+        }
+
         [HttpGet(Name = "GetAllPersons")]
         public IEnumerable<Person> GetPersons()
         {
-            throw NotImplementedException();
+            return _personRepository.GetPersons();
         }
 
         [HttpGet(Name = "GetPerson")]
         public Person GetPerson(int id)
         {
-            throw NotImplementedException();
+            return _personRepository.GetPerson(id);
         }
 
         [HttpPost(Name = "AddPerson")]
-        public Person addPerson()
+        public Person addPerson(Person person)
         {
-            throw NotImplementedException();
+            return _personRepository.AddPerson(person);
         }
 
         [HttpDelete(Name = "DeletePerson")]
-        public Person deletePerson(int id)
+        public void deletePerson(int id)
         {
-            throw NotImplementedException();
+            _personRepository.DeletePerson(id);
         }
 
         [HttpPut(Name = "updatePerson")]  //kan ook patch ipv put
-        public Person putPerson(int id, string newEmail, string newFirstName, string newLastName, Sex newSex, DateTime newBirtdate)
+        public Person putPerson(Person person)
         {
-            throw NotImplementedException();
+            return _personRepository.UpdatePerson(person);
         }
 
 

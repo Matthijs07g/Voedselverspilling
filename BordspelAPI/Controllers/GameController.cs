@@ -9,34 +9,41 @@ namespace BordspelAPI.Controllers
     [Route("[controller]")]
     public class GameController : ControllerBase
     {
-        [HttpGet(Name ="GetAllGames")]
-        public IEnumerable<Game> GetGames()
+        private IGamesRepository _gamesRepository;
+
+        public GameController(IGamesRepository gamesRepository) 
         {
-            throw NotImplementedException();   
+            _gamesRepository = gamesRepository ?? throw new ArgumentNullException(nameof(gamesRepository));
         }
 
-        [HttpGet(Name ="GetGame")]
+        [HttpGet]
+        public IEnumerable<Game> GetGames()
+        {
+           return _gamesRepository.GetGames().ToArray(); 
+        }
+
+        [HttpGet("{id}")]
         public Game GetGame (int id) 
-        { 
-            throw NotImplementedException(); 
+        {
+            return _gamesRepository.GetGameById(id);
         }
 
         [HttpPost(Name ="AddGame")]
-        public Game addGame(string Name, string Desc, Genre genre, Boolean adult, string picture, string type)
+        public Game addGame(Game game)
         {
-            throw NotImplementedException();
+            return _gamesRepository.AddGame(game);
         }
 
         [HttpDelete(Name ="DeleteGame")]
-        public Game deleteGame(int id)
+        public void deleteGame(int id)
         {
-            throw NotImplementedException();
+            _gamesRepository.DeleteGame(id);
         }
 
         [HttpPut(Name ="updateGame")]  //kan ook patch ipv put
-        public Game putGame(int id, string newName, string newDesc, Genre newGenre, Boolean newAdult, string newpicture, string newtype)
+        public Game putGame(Game game)
         {
-            throw NotImplementedException();
+            return _gamesRepository.UpdateGame(game);
         }
              
 

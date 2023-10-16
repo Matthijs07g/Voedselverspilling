@@ -11,5 +11,19 @@ namespace Domain.Services
     {
 
         IQueryable<Game> Games { get; }
+
+        public IEnumerable<Game> GetGames();
+
+        public Game GetGameById(int id);
+
+        public Game AddGame(Game game);
+
+        public Game UpdateGame(Game game);
+
+        public void DeleteGame(int id);
+
+
+
+
     }
 }

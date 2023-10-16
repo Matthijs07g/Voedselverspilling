@@ -1,5 +1,6 @@
 ﻿using Domain.Models;
 using Domain.Models.Enums;
+using Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BordspelAPI.Controllers
@@ -8,39 +9,40 @@ namespace BordspelAPI.Controllers
     [Route("[controller]")]
     public class FoodController : ControllerBase
     {
+        private IFoodRepository _foodRepository;
 
-        public FoodController()
+        public FoodController(IFoodRepository foodRepository)
         {
-
+            _foodRepository = foodRepository ?? throw new ArgumentNullException(nameof(foodRepository));
         }
         [HttpGet(Name = "GetAllFood")]
-        public IEnumerable<Food> GetFood()
+        public IEnumerable<Food> GetAllFood()
         {
-            throw NotImplementedException();
+             return _foodRepository.GetFoods();
         }
 
         [HttpGet(Name = "GetFood")]
         public Food GetFood(int id)
         {
-            throw NotImplementedException();
+            return _foodRepository.GetFoodById(id);
         }
 
         [HttpPost(Name = "AddFood")]
         public Food addFood(Food food)
         {
-            throw NotImplementedException();
+            return _foodRepository.AddFood(food);
         }
 
         [HttpDelete(Name = "DeleteFood")]
-        public Food deleteFood(int id)
+        public void deleteFood(int id)
         {
-            throw NotImplementedException();
+            _foodRepository.DeleteFoodById(id);
         }
 
         [HttpPut(Name = "updateFood")]  //kan ook patch ipv put
         public Food putFood(Food food)
         {
-            throw NotImplementedException();
+            return _foodRepository.UpdateFood(food);
         }
 
 
