@@ -26,7 +26,7 @@ namespace BordspelAPI.Controllers
         }
 
         [HttpPost(Name = "AddFood")]
-        public Food addFood(string Name, Boolean Lactose, Boolean Nuts, Boolean Vegetarian, Boolean Alcohol)
+        public Food addFood(Food food)
         {
             throw NotImplementedException();
         }
@@ -38,7 +38,7 @@ namespace BordspelAPI.Controllers
         }
 
         [HttpPut(Name = "updateFood")]  //kan ook patch ipv put
-        public Food putFood(int id, string newName, Boolean newLactose, Boolean newNuts, Boolean newVegetarian, Boolean newAlcohol)
+        public Food putFood(Food food)
         {
             throw NotImplementedException();
         }
