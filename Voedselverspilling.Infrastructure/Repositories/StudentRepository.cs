@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Voedselverspilling.Infrastructure.Repositories
 {
-    internal class StudentRepository
+    public class StudentRepository
     {
     }
 }

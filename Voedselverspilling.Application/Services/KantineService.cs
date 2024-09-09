@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Voedselverspilling.Infrastructure.Repositories
+namespace Voedselverspilling.Application.Services
 {
-    public class PakketRepository
+    public class KantineService
     {
     }
 }

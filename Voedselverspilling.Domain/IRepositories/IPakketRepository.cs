@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Voedselverspilling.Domain.Interfaces
 {
-    internal interface IStudentRepository
+    public interface IPakketRepository
     {
     }
 }

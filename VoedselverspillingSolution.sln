@@ -5,7 +5,7 @@ VisualStudioVersion = 17.11.35222.181
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voedselverspilling.Domain", "Voedselverspilling.Domain\Voedselverspilling.Domain.csproj", "{413469DC-E5BA-4DAE-AFC7-4E3A10A24DDD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voedselverspilling.Application", "Voedselverspilling.Application\Voedselverspilling.Application.csproj", "{D39729DD-81C2-46B8-B0A4-D9A1D2197D47}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voedselverspilling.DomainServices", "Voedselverspilling.Application\Voedselverspilling.DomainServices.csproj", "{D39729DD-81C2-46B8-B0A4-D9A1D2197D47}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voedselverspilling.Infrastructure", "Voedselverspilling.Infrastructure\Voedselverspilling.Infrastructure.csproj", "{D6930BB5-DA31-4F7A-AB0D-7C19E7366B4F}"
 EndProject

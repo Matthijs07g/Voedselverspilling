@@ -1,4 +1,28 @@
+using Microsoft.Extensions.Configuration;
+using Voedselverspilling.Application.Services;
+using Voedselverspilling.Domain.Interfaces;
+using Voedselverspilling.Infrastructure;
+using Voedselverspilling.Infrastructure.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
+
+
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddControllersWithViews();
+
+    // Voeg je services toe
+    services.AddScoped<IStudentService, StudentService>();
+    services.AddScoped<IKantineService, KantineService>();
+
+    // Voeg je repositories toe
+    services.AddScoped<IStudentRepository, StudentRepository>();
+    services.AddScoped<IPakketRepository, PakketRepository>();
+
+    // Voeg je DbContext toe voor Entity Framework
+    services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+}
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
