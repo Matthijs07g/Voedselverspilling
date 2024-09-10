@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Voedselverspilling.Domain.Models
 {
-    public class Kantine
+    public class Product
     {
-        public string? Stad {  get; set; }
-        public string? Locatie { get; set; }
-        public Boolean warmMeals { get; set; }
+        public required string Name { get; set; }
+        public Boolean isAlcohol { get; set; }
+        public string? Foto { get; set; }
     }
 }
