@@ -13,11 +13,11 @@ namespace Voedselverspilling.Domain.Models
         public List<Product> Products { get; set; } = new List<Product>();
         public required string City {  get; set; }
         public required Kantine Kantine { get; set; }
-        public DateTime collectTime { get; set; }
-        public Boolean isAdult {  get; set; }
+        public DateTime CollectTime { get; set; }
+        public Boolean IsAdult {  get; set; }
         public double Price { get; set; }
         public string? Type { get; set; }
-        public Student? reservedBy { get; set; }
+        public Student? ReservedBy { get; set; }
     }
 
     enum maaltijdType

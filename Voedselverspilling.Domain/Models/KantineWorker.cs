@@ -9,7 +9,7 @@ namespace Voedselverspilling.Domain.Models
     public class KantineWorker
     {
         public required string Name { get; set; }
-        public required int workNumber { get; set; }
+        public required int WorkNumber { get; set; }
         public required string City {  get; set; }
         public required string Location { get; set; }
     }

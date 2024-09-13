@@ -10,6 +10,6 @@ namespace Voedselverspilling.Domain.Models
     {
         public string? Stad {  get; set; }
         public string? Locatie { get; set; }
-        public Boolean warmMeals { get; set; }
+        public Boolean WarmMeals { get; set; }
     }
 }

@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace Voedselverspilling.Domain.Models
 {
-    internal class KantineWorkerId
+    public class KantineWorkerId
     {
+        public required int WorkNumber { get; set; }
+        public required string Pass {  get; set; }
+        public required KantineWorker KantineWorker { get; set; }
     }
 }
