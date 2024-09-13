@@ -26,5 +26,10 @@ namespace Voedselverspilling.Infrastructure
         {
             optionsBuilder.UseSqlServer(@"Server=localhost;Database=Voedselverspilling;Trusted_Connection=True;");
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+
+        }
     }
 }
