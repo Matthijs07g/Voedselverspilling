@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Voedselverspilling.Application.Services
 {
-    public class PakketService
+    public interface IPakketService
     {
     }
 }

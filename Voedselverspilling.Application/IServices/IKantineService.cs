@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Voedselverspilling.Application.Services
 {
-    public class KantineService
+    public interface IKantineService
     {
     }
 }

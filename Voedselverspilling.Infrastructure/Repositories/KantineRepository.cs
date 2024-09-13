@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Voedselverspilling.Domain.IRepositories;
 
 namespace Voedselverspilling.Infrastructure.Repositories
 {
-    public class KantineRepository
+    public class KantineRepository : IKantineRepository
     {
     }
 }

@@ -1,24 +1,36 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Voedselverspilling.Application.Services;
 using Voedselverspilling.Domain.Interfaces;
+using Voedselverspilling.Domain.IRepositories;
+using Voedselverspilling.DomainServices.Services;
 using Voedselverspilling.Infrastructure;
 using Voedselverspilling.Infrastructure.Repositories;
+using Voedselverspilling.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 
     // Voeg je services toe
-//    builder.Services.AddScoped<IStudentService, StudentService>();
-//    builder.Services.AddScoped<IKantineService, KantineService>();
+builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<IKantineService, KantineService>();
+builder.Services.AddScoped<IKantineWorkerService, KantineWorkerService>();
+builder.Services.AddScoped<IPakketService, PakketService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IReserveringService, ReserveringService>();
 
     // Voeg je repositories toe
-//    builder.Services.AddScoped<IStudentRepository, StudentRepository>();
-//    builder.Services.AddScoped<IPakketRepository, PakketRepository>();
+builder.Services.AddScoped<IKantineRepository, KantineRepository>();
+builder.Services.AddScoped<IKantineWorkerRepository, KantineWorkerRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IReserveringRepository, ReserveringRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IPakketRepository, PakketRepository>();
 
     // Voeg je DbContext toe voor Entity Framework
-//    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//        options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+   options.UseSqlServer(builder.Configuration.GetConnectionString("VoedselverspillingDbLocal")));
 
 
 // Add services to the container.
