@@ -8,6 +8,7 @@ namespace Voedselverspilling.Domain.Models
 {
     public class Product
     {
+        public int Id { get; set; }
         public required string Name { get; set; }
         public Boolean IsAlcohol { get; set; }
         public string? Foto { get; set; }

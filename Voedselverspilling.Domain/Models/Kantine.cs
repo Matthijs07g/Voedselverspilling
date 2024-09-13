@@ -8,6 +8,7 @@ namespace Voedselverspilling.Domain.Models
 {
     public class Kantine
     {
+        public int Id { get; set; }
         public string? Stad {  get; set; }
         public string? Locatie { get; set; }
         public Boolean WarmMeals { get; set; }
