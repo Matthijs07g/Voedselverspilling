@@ -10,7 +10,7 @@ namespace Voedselverspilling.Domain.Models
     public class Pakket
     {
         public required string Name { get; set; }
-        public required List<Product> Products { get; set; }
+        public List<Product> Products { get; set; } = new List<Product>();
         public required string City {  get; set; }
         public required Kantine Kantine { get; set; }
         public DateTime collectTime { get; set; }
