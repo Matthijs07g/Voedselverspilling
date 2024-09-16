@@ -10,15 +10,13 @@ namespace Voedselverspilling.Domain.Models
     public class Pakket
     {
         public int Id { get; set; }
-        public required string Name { get; set; }
-        public List<Product> Products { get; set; } = new List<Product>();
-        public required string City {  get; set; }
+        public required string Naam { get; set; }
+        public List<Product> Producten { get; set; } = new List<Product>();
+        public required string Stad {  get; set; }
         public required Kantine Kantine { get; set; }
-        public DateTime CollectTime { get; set; }
-        public Boolean IsAdult {  get; set; }
-        public double Price { get; set; }
+        public Boolean Is18 {  get; set; }
+        public double Prijs { get; set; }
         public string? Type { get; set; }
-        public Student? ReservedBy { get; set; }
     }
 
     enum maaltijdType

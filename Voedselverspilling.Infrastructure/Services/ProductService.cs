@@ -9,5 +9,6 @@ namespace Voedselverspilling.Infrastructure.Services
 {
     public class ProductService : IProductService
     {
+
     }
 }

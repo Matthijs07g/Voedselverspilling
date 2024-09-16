@@ -8,9 +8,10 @@ namespace Voedselverspilling.Domain.Models
 {
     public class Reservering
     {
-        public int ReservationId { get; set; }
-        public DateTime ReservationDate { get; set; }
-        public Boolean Collected { get; set; }
+        public int ReserveringId { get; set; }
+        public DateTime ReservaringDatum { get; set; }
+        public Boolean IsOpgehaald { get; set; }
+        public DateTime TijdOpgehaald { get; set; }
 
         public required Student Student { get; set; }
         public required Pakket Pakket { get; set; }

@@ -8,8 +8,8 @@ namespace Voedselverspilling.Domain.Models
 {
     public class StudentID
     {
-        public required int StudentNumber { get; set; }
-        public required string Pass {  get; set; }
+        public required int StudentNummer { get; set; }
+        public required string Wachtwoord {  get; set; }
         public required Student Student { get; set; }
     }
 }

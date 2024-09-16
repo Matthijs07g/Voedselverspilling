@@ -8,8 +8,8 @@ namespace Voedselverspilling.Domain.Models
 {
     public class KantineWorkerId
     {
-        public required int WorkNumber { get; set; }
-        public required string Pass {  get; set; }
+        public required int Personeelsnummer { get; set; }
+        public required string Wachtwoord {  get; set; }
         public required KantineWorker KantineWorker { get; set; }
     }
 }
