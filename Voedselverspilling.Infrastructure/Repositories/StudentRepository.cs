@@ -18,7 +18,7 @@ namespace Voedselverspilling.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<Student> GetStudentById(int id)
+        public async Task<Student> GetByIdAsync(int id)
         {
             return await _context.Studenten.FindAsync(id);
         }
@@ -32,6 +32,22 @@ namespace Voedselverspilling.Infrastructure.Repositories
         {
             _context.Studenten.Add(student);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(Student student)
+        {
+            _context.Entry(student).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var student = await _context.Studenten.FindAsync(id);
+            if (student != null)
+            {
+                _context.Studenten.Remove(student);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
