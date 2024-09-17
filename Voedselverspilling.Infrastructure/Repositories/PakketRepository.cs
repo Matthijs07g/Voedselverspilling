@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Voedselverspilling.Domain.Interfaces;
+using Voedselverspilling.Domain.IRepositories;
 using Voedselverspilling.Domain.Models;
 
 namespace Voedselverspilling.Infrastructure.Repositories
