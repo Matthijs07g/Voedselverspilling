@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Voedselverspilling.Domain.Models;
 
-namespace Voedselverspilling.Domain.Interfaces
+namespace Voedselverspilling.Domain.IRepositories
 {
     public interface IPakketRepository
     {
