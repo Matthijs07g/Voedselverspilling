@@ -18,16 +18,33 @@ namespace Voedselverspilling.API.Controllers
 
         //GET all
         [HttpGet]
-        public async Task<IEnumerable<Kantine>> GetAllKantines()
+        public async Task<IActionResult> GetAllKantines()
         {
-            return await _kantineRepository.GetAllAsync();
+            IEnumerable<Kantine> kantines = await _kantineRepository.GetAllAsync();
+
+            if(kantines == null)
+            {
+                return BadRequest("No kantines found");
+            }
+            else
+            {
+                return Ok(kantines);
+            }
         }
 
         //GET one
         [HttpGet("{id}")]
-        public async Task<Kantine> GetKantineById(int id)
+        public async Task<IActionResult> GetKantineById(int id)
         {
-            return await _kantineRepository.GetByIdAsync(id);
+            Kantine kantine = await _kantineRepository.GetByIdAsync(id);
+            if(kantine == null)
+            {
+                return BadRequest("Not kantine found");
+            }
+            else
+            {
+                return Ok(kantine);
+            }
         }
 
         //POST

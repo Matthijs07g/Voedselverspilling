@@ -2,6 +2,10 @@ using Voedselverspilling.Application.Services;
 using Voedselverspilling.Domain.Interfaces;
 using Voedselverspilling.Infrastructure.Repositories;
 using Voedselverspilling.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using Voedselverspilling.Infrastructure.Services;
+using Voedselverspilling.Domain.IRepositories;
+using Voedselverspilling.DomainServices.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,13 +16,25 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//// Add Database context (assumes ApplicationDbContext is in Infrastructure)
-//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Voeg je services toe
+builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<IKantineService, KantineService>();
+builder.Services.AddScoped<IKantineWorkerService, KantineWorkerService>();
+builder.Services.AddScoped<IPakketService, PakketService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IReserveringService, ReserveringService>();
 
-//// Register services and repositories
-//builder.Services.AddScoped<IStudentService, StudentService>();
-//builder.Services.AddScoped<IPakketRepository, PakketRepository>();
+// Voeg je repositories toe
+builder.Services.AddScoped<IKantineRepository, KantineRepository>();
+builder.Services.AddScoped<IKantineWorkerRepository, KantineWorkerRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IReserveringRepository, ReserveringRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IPakketRepository, PakketRepository>();
+
+// Voeg je DbContext toe voor Entity Framework
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+   { options.UseSqlServer(builder.Configuration.GetConnectionString("VoedselverspillingDbLocal")); });
 
 // Add CORS configuration (optional)
 builder.Services.AddCors(options =>
@@ -29,7 +45,9 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddAuthorization();
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
