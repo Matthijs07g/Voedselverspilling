@@ -7,7 +7,7 @@ namespace Voedselverspilling.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class KantineController : Controller
+    public class KantineController : ControllerBase
     {
         private readonly IKantineRepository _kantineRepository;
 
@@ -15,6 +15,7 @@ namespace Voedselverspilling.API.Controllers
         {
             _kantineRepository = kantineRepository;
         }
+
 
         //GET all
         [HttpGet]

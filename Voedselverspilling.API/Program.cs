@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Voedselverspilling.Infrastructure.Services;
 using Voedselverspilling.Domain.IRepositories;
 using Voedselverspilling.DomainServices.Services;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,12 +18,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Voeg je services toe
-builder.Services.AddScoped<IStudentService, StudentService>();
-builder.Services.AddScoped<IKantineService, KantineService>();
-builder.Services.AddScoped<IKantineWorkerService, KantineWorkerService>();
-builder.Services.AddScoped<IPakketService, PakketService>();
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<IReserveringService, ReserveringService>();
+//builder.Services.AddScoped<IStudentService, StudentService>();
+//builder.Services.AddScoped<IKantineService, KantineService>();
+//builder.Services.AddScoped<IKantineWorkerService, KantineWorkerService>();
+//builder.Services.AddScoped<IPakketService, PakketService>();
+//builder.Services.AddScoped<IProductService, ProductService>();
+//builder.Services.AddScoped<IReserveringService, ReserveringService>();
 
 // Voeg je repositories toe
 builder.Services.AddScoped<IKantineRepository, KantineRepository>();
@@ -31,6 +32,10 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IReserveringRepository, ReserveringRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IPakketRepository, PakketRepository>();
+
+builder.Services
+    .AddGraphQLServer()
+    .AddQueryType<Query>();
 
 // Voeg je DbContext toe voor Entity Framework
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -59,6 +64,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+app.UseAuthentication();
 
 // Enable CORS (optional)
 app.UseCors("AllowAll");

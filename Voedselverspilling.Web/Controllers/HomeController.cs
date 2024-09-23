@@ -23,6 +23,31 @@ namespace Voedselverspilling.Web.Controllers
             return View();
         }
 
+        public IActionResult Mealboxes()
+        {
+            return View();
+        }
+
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        public IActionResult MealboxAdd()
+        {
+            return View();
+        }
+
+        public IActionResult MealboxDetails()
+        {
+            return View();
+        }
+
+        public IActionResult MealboxEdit()
+        {
+            return View();
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
