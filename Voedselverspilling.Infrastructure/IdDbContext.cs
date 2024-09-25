@@ -14,7 +14,8 @@ namespace Voedselverspilling.Infrastructure
         {
         }
 
-        public DbSet<StudentID> Students { get; set; }
+        public DbSet<StudentId> Students { get; set; }
+        public DbSet<KantineWorkerId> Workers  { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace Voedselverspilling.Domain.Models
 {
-    public class StudentID
+    public class StudentId
     {
         [Key]
         public int Id { get; set; }
         public required int StudentNummer { get; set; }
         public required string Wachtwoord {  get; set; }
-        public required Student Student { get; set; }
+        public required int Student { get; set; }
     }
 }

@@ -1,0 +1,77 @@
+﻿<form id="kantineForm">
+    <label for="stad">Stad:</label>
+    <input type="text" id="stad" name="stad" required><br>
+
+    <label for="locatie">Locatie:</label>
+    <input type="text" id="locatie" name="locatie" required><br>
+
+    <label for="isWarm">Is Warm?</label>
+    <input type="checkbox" id="isWarm" name="isWarm"><br>
+
+    <input type="hidden" id="kantineId" name="kantineId">
+
+    <button type="submit">Bewerken</button>
+</form>
+
+<script>
+    async function loadKantineData(kantineId) {
+        try {
+            const response = await fetch(`/api/kantines/${kantineId}`);
+            if (response.ok) {
+                const kantine = await response.json();
+
+                // Vul de formuliervelden met de huidige kantinegegevens
+                document.getElementById('stad').value = kantine.stad || '';
+                document.getElementById('locatie').value = kantine.locatie || '';
+                document.getElementById('isWarm').checked = kantine.isWarm;
+                document.getElementById('kantineId').value = kantine.id;
+            } else {
+                alert('Kantine niet gevonden.');
+            }
+        } catch (error) {
+            console.error('Fout bij het laden van de kantinegegevens:', error);
+        }
+    }
+
+    // Dit zou je kunnen oproepen als de pagina laadt of nadat een gebruiker een kantine selecteert
+    document.addEventListener('DOMContentLoaded', function () {
+        const kantineId = 1;  // Vervang door de ID van de kantine die je wilt laden
+        loadKantineData(kantineId);
+    });
+
+    // Formulier submissie handler zoals eerder beschreven
+    document.getElementById('kantineForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const kantineId = document.getElementById('kantineId').value;
+        const stad = document.getElementById('stad').value;
+        const locatie = document.getElementById('locatie').value;
+        const isWarm = document.getElementById('isWarm').checked;
+
+        const kantine = {
+            id: kantineId,
+            stad: stad,
+            locatie: locatie,
+            isWarm: isWarm
+        };
+
+        try {
+            const response = await fetch(`/api/kantines/${kantineId}`, {
+                method: 'PUT', // Omdat we de kantine willen bewerken
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(kantine)
+            });
+
+            if (response.ok) {
+                alert('Kantine succesvol bijgewerkt!');
+            } else {
+                alert('Er is een fout opgetreden bij het bijwerken van de kantine');
+            }
+        } catch (error) {
+            console.error('Fout:', error);
+            alert('Er is een fout opgetreden bij het bijwerken van de kantine');
+        }
+    });
+</script>

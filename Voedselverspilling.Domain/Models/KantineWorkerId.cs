@@ -13,6 +13,6 @@ namespace Voedselverspilling.Domain.Models
         public int Id { get; set; }
         public required int Personeelsnummer { get; set; }
         public required string Wachtwoord {  get; set; }
-        public required KantineWorker KantineWorker { get; set; }
+        public required int WorkerId { get; set; }
     }
 }

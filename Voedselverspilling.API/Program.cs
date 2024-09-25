@@ -18,12 +18,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Voeg je services toe
-//builder.Services.AddScoped<IStudentService, StudentService>();
-//builder.Services.AddScoped<IKantineService, KantineService>();
-//builder.Services.AddScoped<IKantineWorkerService, KantineWorkerService>();
-//builder.Services.AddScoped<IPakketService, PakketService>();
-//builder.Services.AddScoped<IProductService, ProductService>();
-//builder.Services.AddScoped<IReserveringService, ReserveringService>();
+builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<IKantineService, KantineService>();
+builder.Services.AddScoped<IKantineWorkerService, KantineWorkerService>();
+builder.Services.AddScoped<IPakketService, PakketService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IReserveringService, ReserveringService>();
 
 // Voeg je repositories toe
 builder.Services.AddScoped<IKantineRepository, KantineRepository>();
@@ -40,6 +40,9 @@ builder.Services
 // Voeg je DbContext toe voor Entity Framework
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
    { options.UseSqlServer(builder.Configuration.GetConnectionString("VoedselverspillingDbLocal")); });
+
+// Identity DbContext
+builder.Services.AddDbContext<IdDbContext>(options => { options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityDbLocal")); });
 
 // Add CORS configuration (optional)
 builder.Services.AddCors(options =>

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,12 +25,80 @@ namespace Voedselverspilling.Infrastructure
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Server=localhost;Database=Voedselverspilling;Trusted_Connection=True;");
+            optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=Voedselverspilling;Trust Server Certificate=True;Integrated Security=True; Encrypt=False");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
 
+            var student1 = new Student()
+            {
+                Id = 1,
+                Naam = "Matthijs van Gastel",
+                GeboorteDatum = new DateOnly(2002, 11, 7),
+                StudentNummer = 2186230,
+                Emailaddress = "mmj.vangastel@student.avans.nl",
+                Stad = "Breda",
+            };
+
+            var product1 = new Product()
+            {
+                Id = 1,
+                Naam = "Broodje zalm",
+                IsAlcohol = false,
+                Foto = "https://www.broodje.nl/wp-content/uploads/2022/03/lunch-broodje-zalm-luxe.jpg"
+            };
+
+            var kantineLA = new Kantine()
+            {
+                Id = 1,
+                Stad = "Breda",
+                Locatie = "LA",
+                IsWarm = true,
+            };
+
+            var pakket1 = new Pakket()
+            {
+                Id = 1,
+                Naam = "Zee eten",
+                ProductenId = new List<int> { 1 },
+                Stad = "Breda",
+                KantineId = 1,
+                Is18 = false,
+                Prijs = 10.99,
+                Type = "Warm"
+            };
+
+            var reservering1 = new Reservering()
+            {
+                ReserveringId = 1,
+                ReservaringDatum = new DateTime(2024, 9, 10),
+                IsOpgehaald = false,
+                StudentId = 1,
+                PakketId = 1,
+            };
+
+
+            modelBuilder.Entity<Student>().HasData(
+                student1
+                );
+
+            modelBuilder.Entity<Product>().HasData(
+                product1
+                );
+
+            modelBuilder.Entity<Kantine>().HasData(
+                kantineLA
+                );
+
+            modelBuilder.Entity<Pakket>().HasData(
+                pakket1
+                );
+
+            modelBuilder.Entity<Reservering>().HasData(
+                reservering1
+                );
         }
     }
 }

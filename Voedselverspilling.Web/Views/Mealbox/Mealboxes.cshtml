@@ -1,0 +1,37 @@
+﻿@model IEnumerable<Voedselverspilling.Web.Models.MealboxModel>
+
+@{
+    ViewData["Title"] = "Lijst van Mealboxes";
+}
+
+<h1>Lijst van Pakketen</h1>
+
+@if (Model == null || !Model.Any())
+{
+    <p>Geen pakketen beschikbaar</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var mealbox in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <a asp-action="MealboxDetails" asp-route-id="@mealbox.Id" class="text-decoration-none text-dark">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">@mealbox.Naam</h5>
+                            <p class="card-text">
+                                <strong>Stad:</strong> @mealbox.Stad <br />
+                                <strong>Prijs:</strong> @(mealbox.Prijs.ToString("C")) <br />
+                                <strong>Type:</strong> @mealbox.Type <br />
+                                <strong>Is 18+:</strong> @(mealbox.Is18 ? "Ja" : "Nee")
+                            </p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+}
+
+<a asp-action="Create" class="btn btn-success">Nieuwe Mealbox Toevoegen</a>

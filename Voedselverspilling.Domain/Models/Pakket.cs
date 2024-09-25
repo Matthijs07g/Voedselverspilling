@@ -13,9 +13,9 @@ namespace Voedselverspilling.Domain.Models
         [Key]
         public int Id { get; set; }
         public required string Naam { get; set; }
-        public List<Product> Producten { get; set; } = new List<Product>();
+        public List<int> ProductenId { get; set; } = new List<int>();
         public required string Stad {  get; set; }
-        public required Kantine Kantine { get; set; }
+        public required int KantineId { get; set; }
         public Boolean Is18 {  get; set; }
         public double Prijs { get; set; }
         public string? Type { get; set; }

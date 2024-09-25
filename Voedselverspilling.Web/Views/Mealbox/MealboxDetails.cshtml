@@ -1,0 +1,39 @@
+﻿@model Voedselverspilling.Web.Models.MealboxModel
+
+@{
+    ViewData["Title"] = "Mealbox Details";
+}
+
+<h1>Mealbox Details</h1>
+
+<div class="card">
+    <div class="card-header">
+        <h2>@Model.Naam</h2>
+    </div>
+    <div class="card-body">
+        <p><strong>Stad:</strong> @Model.Stad</p>
+        <p><strong>Prijs:</strong> @(Model.Prijs.ToString("C"))</p>
+        <p><strong>Type:</strong> @(Model.Type ?? "N/A")</p>
+        <p><strong>Is 18+:</strong> @(Model.Is18 ? "Ja" : "Nee")</p>
+
+        @if (Model.ProductIds != null && Model.ProductIds.Count > 0)
+        {
+            <h4>Producten</h4>
+            <ul>
+                @foreach (var productId in Model.ProductIds)
+                {
+                    <li>Product ID: @productId</li> <!-- Replace this with real product names or details if available -->
+                }
+            </ul>
+        }
+        else
+        {
+            <p><strong>Geen producten in deze mealbox.</strong></p>
+        }
+    </div>
+    <div class="card-footer">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Bewerken</a>
+        <a asp-action="MealboxDelete" asp-route-id="@Model.Id" class="btn btn-danger">Verwijderen</a>
+        <a asp-action="Mealboxes" class="btn btn-secondary">Terug naar lijst</a>
+    </div>
+</div>

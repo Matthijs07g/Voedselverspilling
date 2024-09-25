@@ -14,6 +14,6 @@ namespace Voedselverspilling.Domain.Models
         public required string Naam { get; set; }
         public Boolean IsAlcohol { get; set; }
         public string? Foto { get; set; }
-        public List<Pakket> Pakketen { get; set; } = new List<Pakket>();
+
     }
 }

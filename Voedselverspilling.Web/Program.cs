@@ -20,7 +20,7 @@ builder.Services.AddScoped<IPakketService, PakketService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IReserveringService, ReserveringService>();
 
-    // Voeg je repositories toe
+// Voeg je repositories toe
 builder.Services.AddScoped<IKantineRepository, KantineRepository>();
 builder.Services.AddScoped<IKantineWorkerRepository, KantineWorkerRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
@@ -28,13 +28,15 @@ builder.Services.AddScoped<IReserveringRepository, ReserveringRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IPakketRepository, PakketRepository>();
 
-    // Voeg je DbContext toe voor Entity Framework
+// Voeg je DbContext toe voor Entity Framework
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
    options.UseSqlServer(builder.Configuration.GetConnectionString("VoedselverspillingDbLocal")));
 
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient();
+
 
 var app = builder.Build();
 

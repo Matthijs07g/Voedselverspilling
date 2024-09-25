@@ -15,8 +15,8 @@ namespace Voedselverspilling.Domain.Models
         public Boolean IsOpgehaald { get; set; }
         public DateTime TijdOpgehaald { get; set; }
 
-        public required Student Student { get; set; }
-        public required Pakket Pakket { get; set; }
+        public required int StudentId { get; set; }
+        public required int PakketId { get; set; }
     }
 
 }
