@@ -9,7 +9,7 @@ namespace Voedselverspilling.Web.Controllers
     {
         private readonly ILogger<MealboxController> _logger;
         private readonly HttpClient _httpClient;
-        private readonly string _apiBaseUrl = "http://localhost:5042/api/Pakket";
+        private readonly string _apiBaseUrl = "http://localhost:5042/api";
 
         public MealboxController(HttpClient httpClient, ILogger<MealboxController> logger)
         {
@@ -24,7 +24,7 @@ namespace Voedselverspilling.Web.Controllers
 
             try
             {
-                HttpResponseMessage response = await _httpClient.GetAsync(_apiBaseUrl);
+                HttpResponseMessage response = await _httpClient.GetAsync($"{_apiBaseUrl}/Pakket");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -63,17 +63,46 @@ namespace Voedselverspilling.Web.Controllers
         public async Task<IActionResult> MealboxDetails(int id)
         {
             // Fetch mealbox details from the API or database
-            HttpResponseMessage response = await _httpClient.GetAsync($"{_apiBaseUrl}/{id}");
+            HttpResponseMessage response = await _httpClient.GetAsync($"{_apiBaseUrl}/Pakket/{id}");
 
             if (response.IsSuccessStatusCode)
             {
                 string responseBody = await response.Content.ReadAsStringAsync();
                 var mealbox = JsonSerializer.Deserialize<MealboxModel>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                return View(mealbox);
+
+                List<ProductModel> products = new List<ProductModel>();
+                foreach (var productId in mealbox.ProductIds)
+                {
+                    HttpResponseMessage message = await _httpClient.GetAsync($"{_apiBaseUrl}/Product/{productId}");
+
+                    if (message.IsSuccessStatusCode)
+                    {
+                        string productBody = await message.Content.ReadAsStringAsync(); // Read the response for the product
+                        var product = JsonSerializer.Deserialize<ProductModel>(productBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                        if (product != null)
+                        {
+                            products.Add(product);
+                        }
+                    }
+                    else
+                    {
+                        return NotFound();
+                    }
+                }
+
+                MealboxDetailModel mealboxDetailModel = new MealboxDetailModel()
+                {
+                    MealboxModel = mealbox,
+                    Products = products
+                };
+
+                return View(mealboxDetailModel);
             }
 
             return NotFound(); // Handle the case where the mealbox is not found
         }
+
 
 
         public IActionResult MealboxEdit()
