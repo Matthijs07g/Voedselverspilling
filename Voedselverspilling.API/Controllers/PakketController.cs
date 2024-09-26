@@ -77,13 +77,15 @@ namespace Voedselverspilling.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePakket(int id, [FromBody] Pakket Pakket)
         {
-            if (Pakket == null || Pakket.Id != id)
+            if (Pakket == null)
             {
-                return BadRequest("Pakket object is null or ID mismatch.");
+                return BadRequest("Pakket object is null.");
             }
 
+            Pakket.Id = id;
+
             await _pakketRepository.UpdateAsync(Pakket);
-            return NoContent();
+            return Ok(Pakket);
         }
 
 

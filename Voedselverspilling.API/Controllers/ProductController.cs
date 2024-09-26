@@ -47,20 +47,6 @@ namespace Voedselverspilling.API.Controllers
             }
         }
 
-        //POST
-        //[HttpPost]
-        //public async Task AddProduct(Product Product)
-        //{
-        //    await _productRepository.AddAsync(Product);
-        //}
-
-        //PUT
-        //[HttpPut("{id}")]
-        //public async Task UpdateProduct(int id, Product Product)
-        //{
-        //    await _productRepository.UpdateAsync(Product);
-        //}
-
         [HttpPost]
         public async Task<IActionResult> AddProduct([FromBody] Product Product)
         {
@@ -73,17 +59,18 @@ namespace Voedselverspilling.API.Controllers
             return CreatedAtAction(nameof(AddProduct), new { id = Product.Id }, Product);
         }
 
-        // PUT
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateProduct(int id, [FromBody] Product Product)
+        public async Task<IActionResult> UpdateProduct(int id, [FromBody] Product product)
         {
-            if (Product == null || Product.Id != id)
+            if (product == null)
             {
                 return BadRequest("Product object is null or ID mismatch.");
             }
 
-            await _productRepository.UpdateAsync(Product);
-            return NoContent();
+            product.Id = id;
+
+            await _productRepository.UpdateAsync(product);
+            return Ok(product);
         }
 
 

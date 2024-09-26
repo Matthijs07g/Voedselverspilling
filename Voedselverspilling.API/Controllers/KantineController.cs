@@ -48,20 +48,6 @@ namespace Voedselverspilling.API.Controllers
             }
         }
 
-        //POST
-        //[HttpPost]
-        //public async Task AddKantine(Kantine kantine)
-        //{
-        //    await _kantineRepository.AddAsync(kantine);
-        //}
-
-        //PUT
-        //[HttpPut("{id}")]
-        //public async Task UpdateKantine(int id, Kantine kantine)
-        //{
-        //    await _kantineRepository.UpdateAsync(kantine);
-        //}
-
         [HttpPost]
         public async Task<IActionResult> AddKantine([FromBody] Kantine kantine)
         {
@@ -74,17 +60,18 @@ namespace Voedselverspilling.API.Controllers
             return CreatedAtAction(nameof(AddKantine), new { id = kantine.Id }, kantine);
         }
 
-        // PUT
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateKantine(int id, [FromBody] Kantine kantine)
         {
-            if (kantine == null || kantine.Id != id)
+            if (kantine == null)
             {
-                return BadRequest("Kantine object is null or ID mismatch.");
+                return BadRequest("Kantine object is null.");
             }
 
+            kantine.Id = id;
+
            await _kantineRepository.UpdateAsync(kantine);
-           return NoContent();
+           return Ok(kantine);
         }
 
         
