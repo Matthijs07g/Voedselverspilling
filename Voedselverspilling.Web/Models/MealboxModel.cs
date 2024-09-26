@@ -26,6 +26,6 @@ namespace Voedselverspilling.Web.Models
         public bool Is18 { get; set; }
 
         // Eventueel een lijst van Producten als je dat wilt
-        public List<int> ProductIds { get; set; } = new List<int>(); // Dit kan een lijst van IDs zijn van de producten in de mealbox
+        public List<int> ProductenId { get; set; } = new List<int>(); // Dit kan een lijst van IDs zijn van de producten in de mealbox
     }
 }

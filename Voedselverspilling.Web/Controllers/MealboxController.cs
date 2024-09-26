@@ -67,19 +67,20 @@ namespace Voedselverspilling.Web.Controllers
 
             if (response.IsSuccessStatusCode)
             {
+                Console.WriteLine("Succesful get pakket");
                 string responseBody = await response.Content.ReadAsStringAsync();
                 var mealbox = JsonSerializer.Deserialize<MealboxModel>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
                 List<ProductModel> products = new List<ProductModel>();
-                foreach (var productId in mealbox.ProductIds)
+                foreach (var productId in mealbox.ProductenId)
                 {
                     HttpResponseMessage message = await _httpClient.GetAsync($"{_apiBaseUrl}/Product/{productId}");
-
+                    Console.WriteLine("Getting product");
                     if (message.IsSuccessStatusCode)
                     {
                         string productBody = await message.Content.ReadAsStringAsync(); // Read the response for the product
                         var product = JsonSerializer.Deserialize<ProductModel>(productBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
+                        Console.WriteLine($"Product: {product}");
                         if (product != null)
                         {
                             products.Add(product);
