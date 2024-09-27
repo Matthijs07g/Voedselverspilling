@@ -1,33 +1,31 @@
-﻿@model Voedselverspilling.Web.Models.LoginModel
-@{
-    ViewData["Title"] = "Login";
+﻿@{
+    ViewBag.Title = "Login";
 }
 
 <h2>Login</h2>
 
-<form asp-action="Login" method="post">
+<form asp-controller="Account" asp-action="LoginUser" method="post">
     <div class="form-group">
-        <label asp-for="Username"></label>
-        <input asp-for="Username" class="form-control" />
-        <span asp-validation-for="Username" class="text-danger"></span>
+        <label for="Email">Email</label>
+        <input type="email" class="form-control" id="Email" name="Email" required />
     </div>
-
     <div class="form-group">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" class="form-control" type="password" />
-        <span asp-validation-for="Password" class="text-danger"></span>
+        <label for="Password">Wachtwoord</label>
+        <input type="password" class="form-control" id="Password" name="Password" required />
     </div>
-
     <button type="submit" class="btn btn-primary">Login</button>
 </form>
 
-<div>
-    @if (!string.IsNullOrEmpty(ViewData["ErrorMessage"]?.ToString()))
-    {
-        <p class="text-danger">@ViewData["ErrorMessage"]</p>
-    }
-</div>
-
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            // Check if the login failed flag is set
+        @if (TempData["LoginFailed"] != null)
+        {
+            <text>
+                        alert('Invalid login attempt. Please check your credentials and try again.');
+            </text>
+        }
+        });
+    </script>
 }
