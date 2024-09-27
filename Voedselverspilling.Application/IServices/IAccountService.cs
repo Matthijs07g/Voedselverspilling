@@ -10,6 +10,6 @@ namespace Voedselverspilling.DomainServices.IServices
 {
     public interface IAccountService
     {
-        Task<SignInResult> LoginAsync(LoginRequest loginRequest);
+        Task<AppIdentity> LoginAsync(LoginRequest loginRequest);
     }
 }

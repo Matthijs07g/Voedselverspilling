@@ -10,6 +10,6 @@ namespace Voedselverspilling.Domain.IRepositories
 {
     public interface IAccountRepository
     {
-        Task<SignInResult> LoginAsync(LoginRequest loginRequest);
+        Task<AppIdentity> LoginAsync(LoginRequest loginRequest);
     }
 }

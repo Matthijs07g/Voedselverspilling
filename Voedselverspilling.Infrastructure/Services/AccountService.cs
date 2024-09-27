@@ -19,7 +19,7 @@ namespace Voedselverspilling.Infrastructure.Services
             _accountRepository = accountRepository;
         }
 
-        public async Task<SignInResult> LoginAsync(LoginRequest loginRequest)
+        public async Task<AppIdentity> LoginAsync(LoginRequest loginRequest)
         {
             return await _accountRepository.LoginAsync(loginRequest);
         }
