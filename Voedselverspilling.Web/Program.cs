@@ -25,6 +25,16 @@ builder.Services.AddIdentity<AppIdentity, IdentityRole>()
     .AddEntityFrameworkStores<IdDbContext>()
     .AddDefaultTokenProviders();
 
+// Configure cookie-based authentication
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.ExpireTimeSpan = TimeSpan.FromHours(3); // Set cookie expiration
+    options.SlidingExpiration = true;
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+});
+
 // Add services to the container.
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IKantineService, KantineService>();

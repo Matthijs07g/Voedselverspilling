@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using Voedselverspilling.Domain.Models;
 using Voedselverspilling.Web.Models;
@@ -17,7 +18,7 @@ namespace Voedselverspilling.Web.Controllers
             _logger = logger;
         }
 
-
+        [Authorize(Roles = "Admin, Worker")]
         public async Task<IActionResult> MealboxesAsync()
         {
             List<Pakket> mealboxes = new List<Pakket>();

@@ -36,13 +36,10 @@ namespace Voedselverspilling.Web.Controllers
 
             // Send the request to the API
             var response = await _httpClient.PostAsync($"{_apiBaseUrl}/Account/login", contentString);
-            Console.WriteLine("Sending the login request");
-            Console.WriteLine(contentString);
-            Console.WriteLine(response.Content);
 
             if (response.IsSuccessStatusCode)
             {
-                // Handle success (e.g., redirect or return a success message)
+                
                 return RedirectToAction("Mealboxes", "Mealbox");
             }
             else
