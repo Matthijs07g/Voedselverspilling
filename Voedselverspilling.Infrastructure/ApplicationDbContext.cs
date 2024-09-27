@@ -42,6 +42,16 @@ namespace Voedselverspilling.Infrastructure
                 Stad = "Breda",
             };
 
+            var werker1 = new KantineWorker()
+            {
+                Id = 1,
+                Naam = "Ingrid Jansen",
+                PersoneelsNummer = 1,
+                Email = "i.jansen@avans.nl",
+                Stad = "Breda",
+                KantineId = 1
+            };
+
             var product1 = new Product()
             {
                 Id = 1,
@@ -98,6 +108,10 @@ namespace Voedselverspilling.Infrastructure
 
             modelBuilder.Entity<Reservering>().HasData(
                 reservering1
+                );
+
+            modelBuilder.Entity<KantineWorker>().HasData(
+                werker1
                 );
         }
     }

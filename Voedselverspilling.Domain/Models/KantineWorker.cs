@@ -13,7 +13,8 @@ namespace Voedselverspilling.Domain.Models
         public int Id { get; set; }
         public required string Naam { get; set; }
         public required int PersoneelsNummer { get; set; }
+        public required string Email { get; set; }
         public required string Stad {  get; set; }
-        public required string Locatie { get; set; }
+        public required int KantineId { get; set; }
     }
 }

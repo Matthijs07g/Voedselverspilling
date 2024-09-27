@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Voedselverspilling.Application.Services;
 using Voedselverspilling.Domain.IRepositories;
 using Voedselverspilling.Domain.Models;
 
@@ -8,11 +9,11 @@ namespace Voedselverspilling.API.Controllers
     [Route("api/[controller]")]
     public class PakketController : ControllerBase
     {
-        private readonly IPakketRepository _pakketRepository;
+        private readonly IPakketService _pakketService;
 
-        public PakketController(IPakketRepository pakketRepository)
+        public PakketController(IPakketService pakketService)
         {
-            _pakketRepository = pakketRepository;
+            _pakketService = pakketService;
         }
 
 
@@ -20,7 +21,7 @@ namespace Voedselverspilling.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllPakketen()
         {
-            IEnumerable<Pakket> Pakketen = await _pakketRepository.GetAllAsync();
+            IEnumerable<Pakket> Pakketen = await _pakketService.GetAllPakketsAsync();
 
             if (Pakketen == null)
             {
@@ -36,7 +37,7 @@ namespace Voedselverspilling.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPakketById(int id)
         {
-            Pakket Pakket = await _pakketRepository.GetByIdAsync(id);
+            Pakket Pakket = await _pakketService.GetPakketByIdAsync(id);
             if (Pakket == null)
             {
                 return BadRequest("Not Pakket found");
@@ -47,20 +48,6 @@ namespace Voedselverspilling.API.Controllers
             }
         }
 
-        //POST
-        //[HttpPost]
-        //public async Task AddPakket(Pakket Pakket)
-        //{
-        //    await _pakketRepository.AddAsync(Pakket);
-        //}
-
-        //PUT
-        //[HttpPut("{id}")]
-        //public async Task UpdatePakket(int id, Pakket Pakket)
-        //{
-        //    await _pakketRepository.UpdateAsync(Pakket);
-        //}
-
         [HttpPost]
         public async Task<IActionResult> AddPakket([FromBody] Pakket Pakket)
         {
@@ -69,7 +56,7 @@ namespace Voedselverspilling.API.Controllers
                 return BadRequest("Pakket object is null.");
             }
 
-            await _pakketRepository.AddAsync(Pakket);
+            await _pakketService.AddPakketAsync(Pakket);
             return CreatedAtAction(nameof(AddPakket), new { id = Pakket.Id }, Pakket);
         }
 
@@ -84,7 +71,7 @@ namespace Voedselverspilling.API.Controllers
 
             Pakket.Id = id;
 
-            await _pakketRepository.UpdateAsync(Pakket);
+            await _pakketService.UpdatePakketAsync(Pakket);
             return Ok(Pakket);
         }
 
@@ -94,7 +81,7 @@ namespace Voedselverspilling.API.Controllers
         [HttpDelete("{id}")]
         public async Task DeletePakket(int id)
         {
-            await _pakketRepository.DeleteAsync(id);
+            await _pakketService.DeletePakketAsync(id);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Voedselverspilling.Application.Services;
 using Voedselverspilling.Domain.IRepositories;
 using Voedselverspilling.Domain.Models;
 
@@ -9,11 +10,11 @@ namespace Voedselverspilling.API.Controllers
     [Route("api/[controller]")]
     public class KantineController : ControllerBase
     {
-        private readonly IKantineRepository _kantineRepository;
+        private readonly IKantineService _kantineService;
 
-        public KantineController(IKantineRepository kantineRepository)
+        public KantineController(IKantineService kantineService)
         {
-            _kantineRepository = kantineRepository;
+            _kantineService = kantineService;
         }
 
 
@@ -21,7 +22,7 @@ namespace Voedselverspilling.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllKantines()
         {
-            IEnumerable<Kantine> kantines = await _kantineRepository.GetAllAsync();
+            IEnumerable<Kantine> kantines = await _kantineService.GetAllKantinesAsync();
 
             if(kantines == null)
             {
@@ -37,7 +38,7 @@ namespace Voedselverspilling.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetKantineById(int id)
         {
-            Kantine kantine = await _kantineRepository.GetByIdAsync(id);
+            Kantine kantine = await _kantineService.GetKantineByIdAsync(id);
             if(kantine == null)
             {
                 return BadRequest("Not kantine found");
@@ -56,7 +57,7 @@ namespace Voedselverspilling.API.Controllers
                 return BadRequest("Kantine object is null.");
             }
 
-            await _kantineRepository.AddAsync(kantine);
+            await _kantineService.AddKantineAsync(kantine);
             return CreatedAtAction(nameof(AddKantine), new { id = kantine.Id }, kantine);
         }
 
@@ -70,7 +71,7 @@ namespace Voedselverspilling.API.Controllers
 
             kantine.Id = id;
 
-           await _kantineRepository.UpdateAsync(kantine);
+           await _kantineService.UpdateKantineAsync(kantine);
            return Ok(kantine);
         }
 
@@ -80,7 +81,7 @@ namespace Voedselverspilling.API.Controllers
         [HttpDelete("{id}")]
         public async Task DeleteKantine(int id)
         {
-            await _kantineRepository.DeleteAsync(id);
+            await _kantineService.DeleteKantineAsync(id);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Voedselverspilling.Domain.IRepositories;
 using Voedselverspilling.Domain.Models;
+using Voedselverspilling.DomainServices.Services;
 
 namespace Voedselverspilling.API.Controllers
 {
@@ -8,11 +9,11 @@ namespace Voedselverspilling.API.Controllers
     [Route("api/[controller]")]
     public class ProductController : ControllerBase
     {
-        private readonly IProductRepository _productRepository;
+        private readonly IProductService _productService;
 
-        public ProductController(IProductRepository productRepository)
+        public ProductController(IProductService productService)
         {
-            _productRepository = productRepository;
+            _productService = productService;
         }
 
 
@@ -20,7 +21,7 @@ namespace Voedselverspilling.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllProducten()
         {
-            IEnumerable<Product> Producten = await _productRepository.GetAllAsync();
+            IEnumerable<Product> Producten = await _productService.GetAllProductsAsync();
 
             if (Producten == null)
             {
@@ -36,7 +37,7 @@ namespace Voedselverspilling.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductById(int id)
         {
-            Product Product = await _productRepository.GetByIdAsync(id);
+            Product Product = await _productService.GetProductByIdAsync(id);
             if (Product == null)
             {
                 return BadRequest("Not Product found");
@@ -55,7 +56,7 @@ namespace Voedselverspilling.API.Controllers
                 return BadRequest("Product object is null.");
             }
 
-            await _productRepository.AddAsync(Product);
+            await _productService.AddProductAsync(Product);
             return CreatedAtAction(nameof(AddProduct), new { id = Product.Id }, Product);
         }
 
@@ -69,7 +70,7 @@ namespace Voedselverspilling.API.Controllers
 
             product.Id = id;
 
-            await _productRepository.UpdateAsync(product);
+            await _productService.UpdateProductAsync(product);
             return Ok(product);
         }
 
@@ -79,7 +80,7 @@ namespace Voedselverspilling.API.Controllers
         [HttpDelete("{id}")]
         public async Task DeleteProduct(int id)
         {
-            await _productRepository.DeleteAsync(id);
+            await _productService.DeleteProductAsync(id);
         }
     }
 }
