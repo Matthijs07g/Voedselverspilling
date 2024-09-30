@@ -32,17 +32,20 @@ namespace Voedselverspilling.Infrastructure.Repositories
                 Console.WriteLine("User not found");
                 throw new UnauthorizedAccessException("Invalid login attempt"); // User not found
             }
+
             // Step 2: Check if the password is correct
-            var result = await _signInManager.PasswordSignInAsync(user, loginRequest.Password, false, lockoutOnFailure: false);
+            var result = await _signInManager.PasswordSignInAsync(user, loginRequest.Password, true, lockoutOnFailure: false);
 
             if (!result.Succeeded)
             {
                 throw new UnauthorizedAccessException("Invalid credentials"); // Incorrect password
             }
-            // Return the authenticated user instead of SignInResult
+
+            // Step 3: Create the authentication cookie
+            await _signInManager.SignInAsync(user, isPersistent: false);
+
+            // Optional: Return user object if needed for client-side purposes (e.g., profile data)
             return user; // Successful login, return the user
         }
-
-
     }
 }

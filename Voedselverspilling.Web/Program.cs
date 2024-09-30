@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -21,19 +22,29 @@ builder.Services.AddDbContext<IdDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityDbLocal")));
 
 // Register Identity services
-builder.Services.AddIdentity<AppIdentity, IdentityRole>()
-    .AddEntityFrameworkStores<IdDbContext>()
-    .AddDefaultTokenProviders();
+builder.Services.AddIdentity<AppIdentity, IdentityRole>(options =>
+{
+    // Configure Identity options as necessary
+    options.Password.RequireDigit = false;
+    options.Password.RequiredLength = 3;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+    options.SignIn.RequireConfirmedAccount = false;
+})
+.AddEntityFrameworkStores<IdDbContext>()
+.AddDefaultTokenProviders();
 
 // Configure cookie-based authentication
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.Cookie.HttpOnly = true;
-    options.ExpireTimeSpan = TimeSpan.FromHours(3); // Set cookie expiration
-    options.SlidingExpiration = true;
-    options.LoginPath = "/Account/Login";
-    options.AccessDeniedPath = "/Account/AccessDenied";
-});
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.HttpOnly = true;
+        options.ExpireTimeSpan = TimeSpan.FromHours(3); // Set cookie expiration
+        options.SlidingExpiration = true; // Allows the cookie to be refreshed on activity
+        options.LoginPath = "/Account/Login"; // Redirect here on login failure
+        options.AccessDeniedPath = "/Account/AccessDenied"; // Redirect here on access denied
+    });
 
 // Add services to the container.
 builder.Services.AddScoped<IStudentService, StudentService>();
@@ -55,19 +66,6 @@ builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
-
-
-builder.Services.Configure<IdentityOptions>(options =>
-{
-    options.Password.RequireDigit = false;
-    options.Password.RequiredLength = 3;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireLowercase = false;
-});
-
-
-
 
 var app = builder.Build();
 
@@ -98,7 +96,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication();
+app.UseAuthentication(); // Ensure this is before UseAuthorization
 app.UseAuthorization();
 
 app.MapControllerRoute(
@@ -137,7 +135,7 @@ async Task SeedRolesAndUsersAsync(UserManager<AppIdentity> userManager, RoleMana
         {
             UserName = workerEmail,
             Email = workerEmail,
-            Rol = "Worker",
+            Rol = "Worker", // Ensure your AppIdentity class has a property for roles if needed
             EmailConfirmed = true
         };
 
@@ -195,7 +193,7 @@ async Task SeedRolesAndUsersAsync(UserManager<AppIdentity> userManager, RoleMana
             EmailConfirmed = true,
         };
 
-        var password = "admin";
+        var password = "admin"; // Secure password
         var createAdmin = await userManager.CreateAsync(admin, password);
 
         if (createAdmin.Succeeded)

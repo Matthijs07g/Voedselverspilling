@@ -6,6 +6,7 @@ using Voedselverspilling.Web.Models;
 
 namespace Voedselverspilling.Web.Controllers
 {
+    [Authorize(Roles ="Admin, Worker, Student")]
     public class MealboxController : Controller
     {
         private readonly ILogger<MealboxController> _logger;
@@ -18,13 +19,14 @@ namespace Voedselverspilling.Web.Controllers
             _logger = logger;
         }
 
-        [Authorize(Roles = "Admin, Worker")]
+        
         public async Task<IActionResult> MealboxesAsync()
         {
             List<Pakket> mealboxes = new List<Pakket>();
 
             try
             {
+                Console.WriteLine("Getting pakketen");
                 HttpResponseMessage response = await _httpClient.GetAsync($"{_apiBaseUrl}/Pakket");
 
                 if (response.IsSuccessStatusCode)
