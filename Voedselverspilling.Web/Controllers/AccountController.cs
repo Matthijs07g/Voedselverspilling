@@ -12,16 +12,22 @@ namespace Voedselverspilling.Web.Controllers
     using System.Text.Json;
     using System.Threading.Tasks;
     using Voedselverspilling.Domain.Models;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.EntityFrameworkCore;
 
     public class AccountController : Controller
     {
         private readonly HttpClient _httpClient;
         private readonly string _apiBaseUrl = "http://localhost:5042/api";
+        private readonly UserManager<AppIdentity> _userManager;
+        private readonly SignInManager<AppIdentity> _signInManager;
 
 
-        public AccountController(HttpClient httpClient)
+        public AccountController(HttpClient httpClient, UserManager<AppIdentity> userManager, SignInManager<AppIdentity> signInManager)
         {
             _httpClient = httpClient;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public IActionResult Login()
@@ -32,71 +38,39 @@ namespace Voedselverspilling.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> LoginUser(LoginRequest loginRequest)
         {
-            // Validate the incoming login request
-            if (!ModelState.IsValid)
+            // Step 1: Check if the user exists
+            var user = await _userManager.Users
+                .FirstOrDefaultAsync(u => u.Email == loginRequest.Email);
+
+            if (user == null)
             {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                return View(loginRequest); // Return to login view with error messages
+                Console.WriteLine("User not found");
+                throw new UnauthorizedAccessException("Invalid login attempt"); // User not found
             }
 
-            // Convert the login request to JSON
-            var jsonContent = JsonSerializer.Serialize(loginRequest);
-            var contentString = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+            // Step 2: Check if the password is correct
+            var result = await _signInManager.PasswordSignInAsync(user, loginRequest.Password, true, lockoutOnFailure: false);
 
-            // Send the request to the API
-            var response = await _httpClient.PostAsync($"{_apiBaseUrl}/Account/login", contentString);
-
-            if (response.IsSuccessStatusCode)
+            if (!result.Succeeded)
             {
-                // Step 1: Read the response body
-                var responseBody = await response.Content.ReadAsStringAsync();
-
-                // Step 2: Deserialize the response body into a user object (assuming AppIdentity contains user and role information)
-                var loginResponse = JsonSerializer.Deserialize<AppIdentity>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                // Check if the login response is valid
-                if (loginResponse == null)
-                {
-                    ModelState.AddModelError(string.Empty, "Login failed. Please try again.");
-                    return View(loginRequest); // Return to login view if deserialization fails
-                }
-
-                // Step 3: Create a claims identity for the user
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, loginResponse.UserName),
-                    new Claim(ClaimTypes.Email, loginResponse.Email),
-                    new Claim(ClaimTypes.Role, loginResponse.Rol) // Ensure Rol is correctly populated
-                };
-
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                // Step 4: Sign in the user and generate the authentication cookie
-                var authProperties = new AuthenticationProperties
-                {
-                    IsPersistent = false, // Set to true if you want the cookie to persist across sessions
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(2) // Set cookie expiration
-                };
-
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
-
-                // Step 5: Redirect to the Mealboxes page after setting the authentication cookie
-                return RedirectToAction("Mealboxes", "Mealbox");
+                throw new UnauthorizedAccessException("Invalid credentials"); // Incorrect password
             }
-            else
-            {
-                // Handle failure (e.g., show an error message)
-                ModelState.AddModelError(string.Empty, "Invalid login attempt. Please check your username and password.");
-                return View(loginRequest); // Return to login view with error messages
-            }
+
+            // Step 3: Create the authentication cookie
+            await _signInManager.SignInAsync(user, isPersistent: false);
+
+            // Optional: Return user object if needed for client-side purposes (e.g., profile data)
+            return RedirectToAction("Mealboxes", "Mealbox"); // Successful login, return the user
         }
 
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
 

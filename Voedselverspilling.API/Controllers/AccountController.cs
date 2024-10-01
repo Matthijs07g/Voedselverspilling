@@ -26,19 +26,22 @@ namespace Voedselverspilling.API.Controllers
         {
             if (loginRequest == null || string.IsNullOrEmpty(loginRequest.Email) || string.IsNullOrEmpty(loginRequest.Password))
             {
-                Console.WriteLine(loginRequest);
                 return BadRequest("Invalid login request");
             }
 
             try
             {
                 var result = await _accountService.LoginAsync(loginRequest);
-                return Ok(result);
+
+                if (result != null)
+                {
+                    return Ok(result); // Send back user details (like role, username, email)
+                }
+
+                return Unauthorized("Invalid credentials"); // Explicit failure response
             }
             catch (UnauthorizedAccessException ex)
             {
-                Console.WriteLine(ex);
-                Console.WriteLine(ex.Message);
                 return Unauthorized(ex.Message);
             }
             catch (Exception ex)
@@ -46,6 +49,7 @@ namespace Voedselverspilling.API.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
 
     }
 }
