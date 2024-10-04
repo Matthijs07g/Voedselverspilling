@@ -1,6 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using Voedselverspilling.Domain.Models;
 using Voedselverspilling.DomainServices.IServices;
 using LoginRequest = Voedselverspilling.Domain.Models.LoginRequest;
@@ -11,45 +17,68 @@ namespace Voedselverspilling.API.Controllers
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
-        private readonly IAccountService _accountService;
+        private readonly UserManager<AppIdentity> _userManager;
+        private readonly SignInManager<AppIdentity> _signInManager;
+        private readonly IConfiguration _configuration;
 
-        public AccountController(IAccountService accountService)
+        public AccountController(UserManager<AppIdentity> userManager, SignInManager<AppIdentity> signInManager, IConfiguration configuration)
         {
-            _accountService = accountService;
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _configuration = configuration;
         }
-
 
         [HttpPost]
         [Route("login")]
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
-            if (loginRequest == null || string.IsNullOrEmpty(loginRequest.Email) || string.IsNullOrEmpty(loginRequest.Password))
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Invalid login request");
+                return BadRequest("Invalid login attempt.");
             }
 
-            try
+            var user = await _userManager.Users
+                .FirstOrDefaultAsync(u => u.Email == loginRequest.Email);
+            if (user == null)
             {
-                var result = await _accountService.LoginAsync(loginRequest);
+                return Unauthorized("Invalid credentials.");
+            }
 
-                if (result != null)
-                {
-                    return Ok(result); // Send back user details (like role, username, email)
-                }
+            var result = await _signInManager.CheckPasswordSignInAsync(user, loginRequest.Password, false);
+            if (!result.Succeeded)
+            {
+                return Unauthorized("Invalid credentials.");
+            }
+            Console.WriteLine(user);
+            // Generate JWT token
+            var token = GenerateJwtToken(user);
 
-                return Unauthorized("Invalid credentials"); // Explicit failure response
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Internal server error");
-            }
+            return Ok(new { Token = token });
         }
 
+        private string GenerateJwtToken(AppIdentity user)
+        {
+            var claims = new[]
+            {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Role, "User") // You can add roles dynamically if needed
+        };
 
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:SecretKey"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["JwtSettings:Issuer"],
+                audience: _configuration["JwtSettings:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(Convert.ToDouble(_configuration["JwtSettings:ExpiryMinutes"])),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
     }
 }

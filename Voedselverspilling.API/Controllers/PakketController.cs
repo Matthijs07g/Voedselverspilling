@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Voedselverspilling.Application.Services;
 using Voedselverspilling.Domain.IRepositories;
 using Voedselverspilling.Domain.Models;
@@ -7,6 +9,7 @@ namespace Voedselverspilling.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    //[Authorize]
     public class PakketController : ControllerBase
     {
         private readonly IPakketService _pakketService;
@@ -22,6 +25,9 @@ namespace Voedselverspilling.API.Controllers
         public async Task<IActionResult> GetAllPakketen()
         {
             IEnumerable<Pakket> Pakketen = await _pakketService.GetAllPakketsAsync();
+            Request.Headers.TryGetValue("Authorization", out var jwt);
+            Console.WriteLine($"JWT: {jwt}");
+
 
             if (Pakketen == null)
             {

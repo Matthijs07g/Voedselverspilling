@@ -45,7 +45,7 @@ namespace Voedselverspilling.Web.Controllers
             if (user == null)
             {
                 Console.WriteLine("User not found");
-                throw new UnauthorizedAccessException("Invalid login attempt"); // User not found
+                return Unauthorized("Invalid login attempt"); // User not found
             }
 
             // Step 2: Check if the password is correct
@@ -53,11 +53,42 @@ namespace Voedselverspilling.Web.Controllers
 
             if (!result.Succeeded)
             {
-                throw new UnauthorizedAccessException("Invalid credentials"); // Incorrect password
+                return Unauthorized("Invalid credentials"); // Incorrect password
             }
 
-            // Step 3: Create the authentication cookie
-            await _signInManager.SignInAsync(user, isPersistent: false);
+            // Step 3: Call the /Account/Login endpoint to generate the JWT
+            var httpClient = new HttpClient();
+            var loginRequestPayload = new
+            {
+                Email = loginRequest.Email,
+                Password = loginRequest.Password
+            };
+
+            // Assume the /Account/Login endpoint returns a JSON object with a "token" property
+            var response = await httpClient.PostAsJsonAsync($"{_apiBaseUrl}/Account/login", loginRequestPayload);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode((int)response.StatusCode, "Error logging in.");
+            }
+
+            var jwtResponse = await response.Content.ReadFromJsonAsync<JwtResponse>();
+            if (jwtResponse == null || string.IsNullOrEmpty(jwtResponse.Token))
+            {
+                return StatusCode((int)response.StatusCode, "Failed to retrieve token.");
+            }
+
+            // Step 4: Store the JWT in an HttpOnly cookie
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,    // Ensure that the cookie can't be accessed via JavaScript
+                Secure = true,      // Ensure the cookie is only sent over HTTPS
+                SameSite = SameSiteMode.Strict, // Prevent CSRF attacks
+                Expires = DateTime.UtcNow.AddMinutes(30) // Adjust expiration as needed
+            };
+
+            // Step 5: Add the JWT to a secure cookie
+            Response.Cookies.Append("jwt", jwtResponse.Token, cookieOptions);
 
             // Optional: Return user object if needed for client-side purposes (e.g., profile data)
             return RedirectToAction("Mealboxes", "Mealbox"); // Successful login, return the user

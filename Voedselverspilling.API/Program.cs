@@ -1,4 +1,4 @@
-//using Microsoft.AspNetCore.Authentication.JwtBearer;
+// using Microsoft.AspNetCore.Authentication.JwtBearer; // Uncomment this line
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Voedselverspilling.Application.Services;
@@ -13,6 +13,9 @@ using Microsoft.AspNetCore.Identity;
 using Voedselverspilling.Domain.Models;
 using Voedselverspilling.DomainServices.IServices;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,40 +60,44 @@ builder.Services.AddIdentity<AppIdentity, IdentityRole>()
     .AddEntityFrameworkStores<IdDbContext>()
     .AddDefaultTokenProviders();
 
-//// 1. Add JWT Authentication
-//var jwtKey = builder.Configuration["JwtSettings:SecretKey"];
-//var jwtIssuer = builder.Configuration["JwtSettings:Issuer"];
-//var jwtAudience = builder.Configuration["JwtSettings:Audience"];
+// 1. Add JWT Authentication Configuration
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var key = Encoding.ASCII.GetBytes(jwtSettings["SecretKey"]);
 
-//builder.Services.AddAuthentication(options =>
-//{
-//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//})
-//.AddJwtBearer(options =>
-//{
-//    options.TokenValidationParameters = new TokenValidationParameters
-//    {
-//        ValidateIssuer = true,
-//        ValidateAudience = true,
-//        ValidateLifetime = true,
-//        ValidateIssuerSigningKey = true,
-//        ValidIssuer = jwtIssuer,
-//        ValidAudience = jwtAudience,
-//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-//    };
-//});
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        ValidateLifetime = true, // Validate token expiration
+        ClockSkew = TimeSpan.Zero  // Optional: reduce default clock skew of 5 mins
+    };
+});
 
 // Add CORS configuration (optional)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
     {
-        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        builder
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials();
     });
 });
 
 builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -102,11 +109,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication();
-app.UseAuthorization();
-
 // Enable CORS (optional)
 app.UseCors("AllowAll");
+
+// Enable authentication and authorization middleware
+app.UseAuthentication(); // Add this line to enable JWT token validation
+app.UseAuthorization();
 
 app.MapControllers();
 

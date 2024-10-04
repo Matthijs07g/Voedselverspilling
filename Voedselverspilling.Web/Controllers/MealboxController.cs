@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using Voedselverspilling.Domain.Models;
 using Voedselverspilling.Web.Models;
 
 namespace Voedselverspilling.Web.Controllers
 {
-    [Authorize(Roles ="Admin, Worker, Student")]
+    [Authorize]
     public class MealboxController : Controller
     {
         private readonly ILogger<MealboxController> _logger;
@@ -27,7 +28,15 @@ namespace Voedselverspilling.Web.Controllers
             try
             {
                 Console.WriteLine("Getting pakketen");
+                Request.Cookies.TryGetValue("jwt", out var jwt);
+                Console.WriteLine($"JWT: {jwt}");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
                 HttpResponseMessage response = await _httpClient.GetAsync($"{_apiBaseUrl}/Pakket");
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    Console.WriteLine("Unauthorized acces");
+                }
 
                 if (response.IsSuccessStatusCode)
                 {
