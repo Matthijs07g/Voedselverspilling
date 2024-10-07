@@ -25,13 +25,32 @@ namespace Voedselverspilling.Web.Controllers
         {
             List<Pakket> mealboxes = new List<Pakket>();
 
+            var mealboxModels = await GetAllMealboxes();
+
+            List<MealboxModel> openMealboxes = new List<MealboxModel>();
+
+            foreach (var mealbox in mealboxModels)
+            {
+                if(mealbox.GereserveerdDoor == null)
+                {
+                    openMealboxes.Add(mealbox);
+                }                
+            }
+
+            return View(openMealboxes);
+        }
+
+        public async Task<IActionResult> MyMealboxesAsync()
+        {
+            List<Student> students = new List<Student>();
+
             try
             {
                 Console.WriteLine("Getting pakketen");
                 Request.Cookies.TryGetValue("jwt", out var jwt);
                 Console.WriteLine($"JWT: {jwt}");
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
-                HttpResponseMessage response = await _httpClient.GetAsync($"{_apiBaseUrl}/Pakket");
+                HttpResponseMessage response = await _httpClient.GetAsync($"{_apiBaseUrl}/Student");
 
                 if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
@@ -41,7 +60,7 @@ namespace Voedselverspilling.Web.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     string responseBody = await response.Content.ReadAsStringAsync();
-                    mealboxes = JsonSerializer.Deserialize<List<Pakket>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    students = JsonSerializer.Deserialize<List<Student>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 }
                 else
                 {
@@ -53,18 +72,25 @@ namespace Voedselverspilling.Web.Controllers
                 ModelState.AddModelError(string.Empty, $"Request error: {e.Message}");
             }
 
-            // Transform `Pakket` to `MealboxModel` if needed
-            var mealboxModels = mealboxes.Select(m => new MealboxModel
-            {
-                Id = m.Id,
-                Naam = m.Naam,
-                Stad = m.Stad,
-                Prijs = m.Prijs,
-                Type = m.Type,
-                Is18 = m.Is18
-            }).ToList();
+            var mealboxModels = GetAllMealboxes();
+            
+            List<MealboxModel> result = await mealboxModels;
+            List<MealboxModel> myMealboxes = new List<MealboxModel>();
 
-            return View(mealboxModels);
+            foreach (var student in students)
+            {
+                if (student.Emailaddress == User.Identity.Name)
+                {
+                    foreach (var item in result)
+                    {
+                        if(item.GereserveerdDoor == student.Id)
+                        {
+                            myMealboxes.Add(item);
+                        }
+                    }
+                }
+            }
+            return View(myMealboxes);
         }
 
         public IActionResult MealboxAdd()
@@ -126,6 +152,92 @@ namespace Voedselverspilling.Web.Controllers
         public IActionResult MealboxDelete()
         {
             return View();
+        }
+
+
+
+
+        private async Task<List<MealboxModel>> GetAllMealboxes()
+        {
+            List<Pakket> mealboxes = new List<Pakket>();
+            List<Reservering> reserverings = new List<Reservering>();
+
+            try
+            {
+                Console.WriteLine("Getting pakketen");
+                Request.Cookies.TryGetValue("jwt", out var jwt);
+                Console.WriteLine($"JWT: {jwt}");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+                HttpResponseMessage response = await _httpClient.GetAsync($"{_apiBaseUrl}/Pakket");
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    Console.WriteLine("Unauthorized acces");
+                }
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    mealboxes = JsonSerializer.Deserialize<List<Pakket>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+                }
+
+                HttpResponseMessage responseReservering = await _httpClient.GetAsync($"{_apiBaseUrl}/Reservering");
+
+                if (responseReservering.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    Console.WriteLine("Unauthorized acces");
+                }
+
+                if (responseReservering.IsSuccessStatusCode)
+                {
+                    string responseBodyReservering = await responseReservering.Content.ReadAsStringAsync();
+                    reserverings = JsonSerializer.Deserialize<List<Reservering>>(responseBodyReservering, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                ModelState.AddModelError(string.Empty, $"Request error: {e.Message}");
+            }
+            var reserveringModels = reserverings.Select(r => new ReserveringModel
+            {
+                ReserveringId = r.ReserveringId,
+                ReservaringDatum = r.ReservaringDatum,
+                IsOpgehaald = r.IsOpgehaald,
+                TijdOpgehaald = r.TijdOpgehaald,
+                StudentId = r.StudentId,
+                PakketId = r.PakketId,
+            }).ToList();
+
+            // Transform `Pakket` to `MealboxModel` if needed
+            var mealboxModels = mealboxes.Select(m => new MealboxModel
+            {
+                Id = m.Id,
+                Naam = m.Naam,
+                Stad = m.Stad,
+                Prijs = m.Prijs,
+                Type = m.Type,
+                Is18 = m.Is18
+            }).ToList();
+
+            foreach (var mealbox in mealboxModels)
+            {
+                foreach (var reservering in reserveringModels)
+                {
+                    if (mealbox.Id == reservering.PakketId)
+                    {
+                        mealbox.GereserveerdDoor = reservering.StudentId;
+                    }
+                }
+            }
+            return mealboxModels;
         }
     }
 }

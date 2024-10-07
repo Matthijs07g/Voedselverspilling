@@ -22,8 +22,10 @@ namespace Voedselverspilling.Web.Models
         [StringLength(50, ErrorMessage = "Het type mag niet langer zijn dan 50 tekens.")]
         public string? Type { get; set; }
 
-        [Display(Name = "Is 18+")]
+        [Display(Name = "Alcohol")]
         public bool Is18 { get; set; }
+
+        public int? GereserveerdDoor {  get; set; } = null;
 
         // Eventueel een lijst van Producten als je dat wilt
         public List<int> ProductenId { get; set; } = new List<int>(); // Dit kan een lijst van IDs zijn van de producten in de mealbox

@@ -91,7 +91,7 @@ namespace Voedselverspilling.Web.Controllers
             Response.Cookies.Append("jwt", jwtResponse.Token, cookieOptions);
 
             // Optional: Return user object if needed for client-side purposes (e.g., profile data)
-            return RedirectToAction("Mealboxes", "Mealbox"); // Successful login, return the user
+            return RedirectToAction("Index", "Home"); // Successful login, return the user
         }
 
 

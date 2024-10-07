@@ -1,14 +1,15 @@
 ﻿@model IEnumerable<Voedselverspilling.Web.Models.MealboxModel>
+@using System.Security.Claims
 
 @{
-    ViewData["Title"] = "Lijst van Mealboxes";
+    ViewData["Title"] = "Lijst van Mijn Mealboxes";
 }
 
-<h1 class="text-center">Lijst van Pakketen</h1>
+<h1 class="text-center">Mijn Pakketen</h1>
 
 @if (Model == null || !Model.Any())
 {
-    <p class="text-center">Geen pakketen beschikbaar</p>
+    <p class="text-center">Geen pakketen gereserveerd</p>
 }
 else
 {
@@ -17,8 +18,10 @@ else
             <!-- Center the row of cards -->
             @foreach (var mealbox in Model)
             {
-                <div class="col-md-5 mb-4 mx-3">
-                    <!-- Two cards per row (approx 50% width) -->
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                
+                    <div class="col-md-5 mb-4 mx-3">
+                        <!-- Two cards per row (approx 50% width) -->
                     <a asp-action="MealboxDetails" asp-route-id="@mealbox.Id" class="text-decoration-none text-dark">
                         <div class="card h-100">
                             <div class="card-body">
@@ -33,11 +36,8 @@ else
                         </div>
                     </a>
                 </div>
+                
             }
         </div>
     </div>
 }
-
-<div class="text-center mt-4">
-    <a asp-action="Create" class="btn btn-success">Nieuwe Mealbox Toevoegen</a>
-</div>
