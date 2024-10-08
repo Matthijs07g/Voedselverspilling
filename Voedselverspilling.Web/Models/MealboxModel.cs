@@ -11,9 +11,12 @@ namespace Voedselverspilling.Web.Models
         [StringLength(100, ErrorMessage = "De naam mag niet langer zijn dan 100 tekens.")]
         public string Naam { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Stad is verplicht.")]
-        [StringLength(100, ErrorMessage = "De stad mag niet langer zijn dan 100 tekens.")]
+        //[Required(ErrorMessage = "Stad is verplicht.")]
+        //[StringLength(100, ErrorMessage = "De stad mag niet langer zijn dan 100 tekens.")]
         public string Stad { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Kies een kantine")]
+        public int KantineId { get; set; }
 
         [Required(ErrorMessage = "Prijs is verplicht.")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Prijs moet groter zijn dan 0.")]
@@ -25,7 +28,12 @@ namespace Voedselverspilling.Web.Models
         [Display(Name = "Alcohol")]
         public bool Is18 { get; set; }
 
+
+
+
         public int? GereserveerdDoor {  get; set; } = null;
+
+        public DateTime? OphaalTijd { get; set; } = null;
 
         // Eventueel een lijst van Producten als je dat wilt
         public List<int> ProductenId { get; set; } = new List<int>(); // Dit kan een lijst van IDs zijn van de producten in de mealbox

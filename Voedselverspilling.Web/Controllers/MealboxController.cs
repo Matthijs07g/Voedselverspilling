@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using Voedselverspilling.Domain.Models;
 using Voedselverspilling.Web.Models;
@@ -42,61 +43,97 @@ namespace Voedselverspilling.Web.Controllers
 
         public async Task<IActionResult> MyMealboxesAsync()
         {
-            List<Student> students = new List<Student>();
-
-            try
-            {
-                Console.WriteLine("Getting pakketen");
-                Request.Cookies.TryGetValue("jwt", out var jwt);
-                Console.WriteLine($"JWT: {jwt}");
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
-                HttpResponseMessage response = await _httpClient.GetAsync($"{_apiBaseUrl}/Student");
-
-                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                {
-                    Console.WriteLine("Unauthorized acces");
-                }
-
-                if (response.IsSuccessStatusCode)
-                {
-                    string responseBody = await response.Content.ReadAsStringAsync();
-                    students = JsonSerializer.Deserialize<List<Student>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
-                }
-            }
-            catch (HttpRequestException e)
-            {
-                ModelState.AddModelError(string.Empty, $"Request error: {e.Message}");
-            }
+            Student student = await GetLoggedStudent();
 
             var mealboxModels = GetAllMealboxes();
             
             List<MealboxModel> result = await mealboxModels;
             List<MealboxModel> myMealboxes = new List<MealboxModel>();
 
-            foreach (var student in students)
+            
+            foreach (var item in result)
             {
-                if (student.Emailaddress == User.Identity.Name)
+                if(item.GereserveerdDoor == student.Id)
                 {
-                    foreach (var item in result)
-                    {
-                        if(item.GereserveerdDoor == student.Id)
-                        {
-                            myMealboxes.Add(item);
-                        }
-                    }
+                     myMealboxes.Add(item);
                 }
             }
+                
+            
             return View(myMealboxes);
         }
 
-        public IActionResult MealboxAdd()
+        [HttpGet]
+        public async Task<IActionResult> MealboxAdd()
         {
-            return View();
+            // Fetch available products from your data source
+            var availableProducts = await GetAvailableProducts();
+            Console.WriteLine("Loading products for creating");
+
+            var model = new MealboxCreateModel
+            {
+                AvailableProducts = availableProducts
+            };
+
+            return View(model);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> MealboxAdd(MealboxCreateModel mealboxCreateModel)
+        {
+            Console.WriteLine("Starting the creating of pakket");
+            if (!ModelState.IsValid)
+            {
+                Console.WriteLine("Model state is invalid:");
+                foreach (var modelState in ModelState)
+                {
+                    foreach (var error in modelState.Value.Errors)
+                    {
+                        Console.WriteLine($"Key: {modelState.Key}, Error: {error.ErrorMessage}");
+                    }
+                }
+                ModelState.AddModelError(string.Empty, "Failed to create the mealbox. Please try again.");
+                // If the model is invalid, return to the view with the current model data
+                mealboxCreateModel.AvailableProducts = await GetAvailableProducts();
+                return View(mealboxCreateModel);
+            }
+
+            KantineWorker worker = await GetLoggedWorker();
+
+            // Create new pakket object from the model
+            var newPakket = new Pakket
+            {
+                Naam = mealboxCreateModel.Mealbox.Naam,
+                Stad = worker.Stad,
+                Prijs = mealboxCreateModel.Mealbox.Prijs,
+                KantineId = worker.KantineId,
+                Type = mealboxCreateModel.Mealbox.Type,
+                Is18 = mealboxCreateModel.Mealbox.Is18,
+                ProductenId = mealboxCreateModel.SelectedProductIds // Use selected product IDs
+            };
+
+            // Serialize and send the new pakket to your API for creation
+            var jsonPakket = JsonSerializer.Serialize(newPakket);
+            var content = new StringContent(jsonPakket, Encoding.UTF8, "application/json");
+
+            Console.WriteLine(content);
+
+            HttpResponseMessage response = await _httpClient.PostAsync($"{_apiBaseUrl}/Pakket", content);
+            Console.WriteLine("Creating pakket");
+
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Succesful in creating pakket");
+                return RedirectToAction("Mealboxes"); // Redirect after successful creation
+            }
+
+            ModelState.AddModelError(string.Empty, "Failed to create the pakket. Please try again.");
+            mealboxCreateModel.AvailableProducts = await GetAvailableProducts(); // Fetch products again for the view
+            return View(mealboxCreateModel); // Return to the view with the current model
+        }
+
+
+
 
         public async Task<IActionResult> MealboxDetails(int id)
         {
@@ -144,18 +181,90 @@ namespace Voedselverspilling.Web.Controllers
 
 
 
-        public IActionResult MealboxEdit()
+        public async Task<IActionResult> MealboxEdit(int id)
         {
-            return View();
+            // Fetch the mealbox data
+            HttpResponseMessage response = await _httpClient.GetAsync($"{_apiBaseUrl}/Pakket/{id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseBody = await response.Content.ReadAsStringAsync();
+                var mealbox = JsonSerializer.Deserialize<MealboxModel>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (mealbox != null)
+                {
+                    // Use the GetAvailableProducts method to get the list of products
+                    var availableProducts = await GetAvailableProducts();
+
+                    var mealboxEditViewModel = new MealboxEditModel
+                    {
+                        Mealbox = mealbox,
+                        AvailableProducts = availableProducts, // Pass the list of all products
+                        SelectedProductIds = mealbox.ProductenId // Preselect the current products
+                    };
+                    return View(mealboxEditViewModel); // Pass both mealbox data and available products
+                }
+            }
+
+            return NotFound(); // If mealbox or products not found, return 404
         }
 
-        public IActionResult MealboxDelete()
+        // POST: Update Mealbox (Handle form submission)
+        [HttpPost]
+        public async Task<IActionResult> MealboxEdit(MealboxEditModel viewModel)
         {
-            return View();
+            if (!ModelState.IsValid)
+            {
+                // If validation fails, fetch the available products again and return to the form
+                viewModel.AvailableProducts = await GetAvailableProducts();
+                return View(viewModel);
+            }
+
+            // Map the view model back to the Pakket entity
+            Pakket mealbox = new Pakket
+            {
+                Id = viewModel.Mealbox.Id,
+                Naam = viewModel.Mealbox.Naam,
+                Stad = viewModel.Mealbox.Stad,
+                KantineId = viewModel.Mealbox.KantineId,
+                Is18 = viewModel.Mealbox.Is18,
+                Prijs = viewModel.Mealbox.Prijs,
+                Type = viewModel.Mealbox.Type,
+                ProductenId = viewModel.SelectedProductIds // Add the selected products here
+            };
+
+            var jsonMealbox = JsonSerializer.Serialize(mealbox);
+            var content = new StringContent(jsonMealbox, Encoding.UTF8, "application/json");
+
+            // Send the PUT request to update the mealbox
+            HttpResponseMessage response = await _httpClient.PutAsync($"{_apiBaseUrl}/Pakket/{mealbox.Id}", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return RedirectToAction("Mealboxes"); // Redirect back to the list of mealboxes after successful update
+            }
+
+            ModelState.AddModelError(string.Empty, "Failed to update the mealbox. Please try again.");
+            // Fetch the available products again in case of failure
+            viewModel.AvailableProducts = await GetAvailableProducts();
+            return View(viewModel); // If API call fails, return to the form
         }
 
 
 
+
+        public async Task<IActionResult> MealboxDelete(int id)
+        {
+            HttpResponseMessage response = await _httpClient.DeleteAsync($"{_apiBaseUrl}/Pakket/{id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                return RedirectToAction("Mealboxes");
+            }
+
+            ModelState.AddModelError(string.Empty, "Failed to delete the mealbox. Try again");
+            return await MealboxDetails(id);
+        }
 
         private async Task<List<MealboxModel>> GetAllMealboxes()
         {
@@ -222,6 +331,7 @@ namespace Voedselverspilling.Web.Controllers
                 Id = m.Id,
                 Naam = m.Naam,
                 Stad = m.Stad,
+                KantineId = m.KantineId,
                 Prijs = m.Prijs,
                 Type = m.Type,
                 Is18 = m.Is18
@@ -234,10 +344,129 @@ namespace Voedselverspilling.Web.Controllers
                     if (mealbox.Id == reservering.PakketId)
                     {
                         mealbox.GereserveerdDoor = reservering.StudentId;
+                        mealbox.OphaalTijd = reservering.TijdOpgehaald;
                     }
                 }
             }
             return mealboxModels;
         }
+    
+        private async Task<Student> GetLoggedStudent()
+        {
+            List<Student> students = new List<Student>();
+
+            try
+            {
+                Console.WriteLine("Getting pakketen");
+                Request.Cookies.TryGetValue("jwt", out var jwt);
+                Console.WriteLine($"JWT: {jwt}");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+                HttpResponseMessage response = await _httpClient.GetAsync($"{_apiBaseUrl}/Student");
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    Console.WriteLine("Unauthorized acces");
+                }
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    students = JsonSerializer.Deserialize<List<Student>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                ModelState.AddModelError(string.Empty, $"Request error: {e.Message}");
+            }
+
+            foreach (var student in students)
+            {
+                if(student.Emailaddress == User.Identity.Name)
+                {
+                    return student;
+                }
+            }
+            return null;
+
+        }
+
+        private async Task<KantineWorker> GetLoggedWorker()
+        {
+            List<KantineWorker> workers = new List<KantineWorker>();
+
+            try
+            {
+                Request.Cookies.TryGetValue("jwt", out var jwt);
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+                HttpResponseMessage response = await _httpClient.GetAsync($"{_apiBaseUrl}/Worker");
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    Console.WriteLine("Unauthorized acces");
+                }
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    workers = JsonSerializer.Deserialize<List<KantineWorker>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                ModelState.AddModelError(string.Empty, $"Request error: {e.Message}");
+            }
+
+            foreach (var worker in workers)
+            {
+                if (worker.Email == User.Identity.Name)
+                {
+                    return worker;
+                }
+            }
+            return null;
+
+        }
+
+        private async Task<List<ProductModel>> GetAvailableProducts()
+        {
+            List<ProductModel> products = new List<ProductModel>();
+
+            try
+            {
+                // Stuur een GET-verzoek naar de API om de producten op te halen
+                HttpResponseMessage response = await _httpClient.GetAsync($"{_apiBaseUrl}/Product");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Lees de inhoud van de response
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    // Deserialize de JSON-response naar een lijst van ProductModel
+                    products = JsonSerializer.Deserialize<List<ProductModel>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                }
+                else
+                {
+                    // Hier kun je eventueel foutafhandeling doen, bijvoorbeeld loggen
+                    ModelState.AddModelError(string.Empty, "Fout bij het ophalen van de producten.");
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                // Foutafhandeling voor netwerkproblemen
+                ModelState.AddModelError(string.Empty, $"Fout bij het uitvoeren van de aanvraag: {e.Message}");
+            }
+
+            return products; // Geef de lijst van producten terug
+        }
+
     }
+
+
 }

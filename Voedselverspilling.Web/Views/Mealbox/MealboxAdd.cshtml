@@ -1,6 +1,48 @@
-﻿@{
-    ViewData["Title"] = "Mealboxes";
-}
-<h1>@ViewData["Title"]</h1>
+﻿@model MealboxCreateModel
 
-<p>Use this page to add mealboxes.</p>
+<h1>Nieuwe Pakket Toevoegen</h1>
+
+<form asp-action="MealboxAdd" method="post">
+    <div class="form-group">
+        <label>Naam</label>
+        <input asp-for="Mealbox.Naam" class="form-control" />
+        <span asp-validation-for="Mealbox.Naam" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Prijs</label>
+        <input asp-for="Mealbox.Prijs" type="number" step="0.01" class="form-control" />
+        <span asp-validation-for="Mealbox.Prijs" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Type</label>
+        <input asp-for="Mealbox.Type" class="form-control" />
+        <span asp-validation-for="Mealbox.Type" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Producten</label>
+        <div>
+            @foreach (var product in Model.AvailableProducts)
+            {
+                <div class="form-check">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           id="product_@product.Id"
+                           name="SelectedProductIds"
+                           value="@product.Id" />
+                    <label class="form-check-label" for="product_@product.Id">@product.Naam</label>
+                </div>
+            }
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Pakket Aanmaken</button>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

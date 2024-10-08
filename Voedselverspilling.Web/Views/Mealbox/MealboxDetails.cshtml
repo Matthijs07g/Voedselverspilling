@@ -34,8 +34,10 @@
         }
     </div>
     <div class="card-footer">
-        <a asp-action="Edit" asp-route-id="@Model.MealboxModel.Id" class="btn btn-primary">Bewerken</a>
-        <a asp-action="MealboxDelete" asp-route-id="@Model.MealboxModel.Id" class="btn btn-danger">Verwijderen</a>
+        @if(User.IsInRole("Admin") || User.IsInRole("Worker")){
+            <a asp-action="MealboxEdit" asp-route-id="@Model.MealboxModel.Id" class="btn btn-primary">Bewerken</a>
+            <a asp-action="MealboxDelete" asp-route-id="@Model.MealboxModel.Id" class="btn btn-danger">Verwijderen</a>
+        }
         <a asp-action="Mealboxes" class="btn btn-secondary">Terug naar lijst</a>
     </div>
 </div>
