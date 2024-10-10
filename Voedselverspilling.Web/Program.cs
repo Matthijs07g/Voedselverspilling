@@ -179,6 +179,31 @@ async Task SeedRolesAndUsersAsync(UserManager<AppIdentity> userManager, RoleMana
             Console.WriteLine($"Failed to create Student user: {string.Join(", ", createStudent.Errors.Select(e => e.Description))}");
         }
     }
+    var student1Email = "t.jansen@student.avans.nl";
+    var student1User = await userManager.FindByEmailAsync(student1Email);
+    if (student1User == null)
+    {
+        var student = new AppIdentity
+        {
+            UserName = student1Email,
+            Email = student1Email,
+            Rol = "Student",
+            EmailConfirmed = true
+        };
+
+        var password = "123"; // Secure password
+        var createStudent = await userManager.CreateAsync(student, password);
+
+        if (createStudent.Succeeded)
+        {
+            await userManager.AddToRoleAsync(student, "Student");
+            Console.WriteLine($"Student user {studentEmail} created successfully.");
+        }
+        else
+        {
+            Console.WriteLine($"Failed to create Student user: {string.Join(", ", createStudent.Errors.Select(e => e.Description))}");
+        }
+    }
 
     // Seed admin user
     var adminEmail = "admin@mail.com";

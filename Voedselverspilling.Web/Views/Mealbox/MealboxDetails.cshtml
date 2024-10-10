@@ -14,7 +14,7 @@
         <p><strong>Stad:</strong> @Model.MealboxModel.Stad</p>
         <p><strong>Prijs:</strong> @(Model.MealboxModel.Prijs.ToString("C"))</p>
         <p><strong>Type:</strong> @(Model.MealboxModel.Type ?? "N/A")</p>
-        <p><strong>Is 18+:</strong> @(Model.MealboxModel.Is18 ? "Ja" : "Nee")</p>
+        <p><strong>Alcohol?:</strong> @(Model.MealboxModel.Is18 ? "Ja" : "Nee")</p>
 
         @if (Model.Products != null && Model.Products.Count > 0)
         {

@@ -50,12 +50,13 @@ namespace Voedselverspilling.Web.Controllers
             List<MealboxModel> result = await mealboxModels;
             List<MealboxModel> myMealboxes = new List<MealboxModel>();
 
-            
-            foreach (var item in result)
-            {
-                if(item.GereserveerdDoor == student.Id)
+            if (student != null) {
+                foreach (var item in result)
                 {
-                     myMealboxes.Add(item);
+                    if (item.GereserveerdDoor == student.Id)
+                    {
+                        myMealboxes.Add(item);
+                    }
                 }
             }
                 
@@ -213,41 +214,59 @@ namespace Voedselverspilling.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> MealboxEdit(MealboxEditModel viewModel)
         {
-            if (!ModelState.IsValid)
+            var reservering = await GetReserveringByPakketId(viewModel.Mealbox.Id);
+            if (reservering == null)
             {
-                // If validation fails, fetch the available products again and return to the form
+                Console.WriteLine("Starting the creating of pakket");
+                if (!ModelState.IsValid)
+                {
+                    Console.WriteLine("Model state is invalid:");
+                    foreach (var modelState in ModelState)
+                    {
+                        foreach (var error in modelState.Value.Errors)
+                        {
+                            Console.WriteLine($"Key: {modelState.Key}, Error: {error.ErrorMessage}");
+                        }
+                    }
+                    ModelState.AddModelError(string.Empty, "Failed to create the mealbox. Please try again.");
+                    // If the model is invalid, return to the view with the current model data
+                    viewModel.AvailableProducts = await GetAvailableProducts();
+                    return View(viewModel);
+                }
+
+                KantineWorker worker = await GetLoggedWorker();
+
+                // Create new pakket object from the model
+                var newPakket = new Pakket
+                {
+                    Naam = viewModel.Mealbox.Naam,
+                    Stad = worker.Stad,
+                    Prijs = viewModel.Mealbox.Prijs,
+                    KantineId = worker.KantineId,
+                    Type = viewModel.Mealbox.Type,
+                    Is18 = viewModel.Mealbox.Is18,
+                    ProductenId = viewModel.SelectedProductIds // Use selected product IDs
+                };
+
+                // Serialize and send the new pakket to your API for creation
+                var jsonPakket = JsonSerializer.Serialize(newPakket);
+                var content = new StringContent(jsonPakket, Encoding.UTF8, "application/json");
+
+                // Send the PUT request to update the mealbox
+                HttpResponseMessage response = await _httpClient.PutAsync($"{_apiBaseUrl}/Pakket/{viewModel.Mealbox.Id}", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("Mealboxes"); // Redirect back to the list of mealboxes after successful update
+                }
+
+                ModelState.AddModelError(string.Empty, "Failed to update the mealbox. Please try again.");
+                // Fetch the available products again in case of failure
                 viewModel.AvailableProducts = await GetAvailableProducts();
-                return View(viewModel);
+                return View(viewModel); // If API call fails, return to the form
             }
-
-            // Map the view model back to the Pakket entity
-            Pakket mealbox = new Pakket
-            {
-                Id = viewModel.Mealbox.Id,
-                Naam = viewModel.Mealbox.Naam,
-                Stad = viewModel.Mealbox.Stad,
-                KantineId = viewModel.Mealbox.KantineId,
-                Is18 = viewModel.Mealbox.Is18,
-                Prijs = viewModel.Mealbox.Prijs,
-                Type = viewModel.Mealbox.Type,
-                ProductenId = viewModel.SelectedProductIds // Add the selected products here
-            };
-
-            var jsonMealbox = JsonSerializer.Serialize(mealbox);
-            var content = new StringContent(jsonMealbox, Encoding.UTF8, "application/json");
-
-            // Send the PUT request to update the mealbox
-            HttpResponseMessage response = await _httpClient.PutAsync($"{_apiBaseUrl}/Pakket/{mealbox.Id}", content);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return RedirectToAction("Mealboxes"); // Redirect back to the list of mealboxes after successful update
-            }
-
-            ModelState.AddModelError(string.Empty, "Failed to update the mealbox. Please try again.");
-            // Fetch the available products again in case of failure
-            viewModel.AvailableProducts = await GetAvailableProducts();
-            return View(viewModel); // If API call fails, return to the form
+            ModelState.AddModelError(string.Empty, "Can't edit a Pakket that has a reservering");
+            return View(viewModel);
         }
 
 
@@ -255,22 +274,28 @@ namespace Voedselverspilling.Web.Controllers
 
         public async Task<IActionResult> MealboxDelete(int id)
         {
-            HttpResponseMessage response = await _httpClient.DeleteAsync($"{_apiBaseUrl}/Pakket/{id}");
-
-            if (response.IsSuccessStatusCode)
+            var reservering = await GetReserveringByPakketId(id);
+            if (reservering == null)
             {
-                return RedirectToAction("Mealboxes");
-            }
+                HttpResponseMessage response = await _httpClient.DeleteAsync($"{_apiBaseUrl}/Pakket/{id}");
 
-            ModelState.AddModelError(string.Empty, "Failed to delete the mealbox. Try again");
-            return await MealboxDetails(id);
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("Mealboxes");
+                }
+
+                ModelState.AddModelError(string.Empty, "Failed to delete the mealbox. Try again");
+                return await MealboxDetails(id);
+            }
+            ModelState.AddModelError(string.Empty, "Failed to delete the mealbox. Already has a reservering");
+            return RedirectToAction("Mealboxes");
         }
 
         private async Task<List<MealboxModel>> GetAllMealboxes()
         {
             List<Pakket> mealboxes = new List<Pakket>();
             List<Reservering> reserverings = new List<Reservering>();
-
+            Student student = await GetLoggedStudent();
             try
             {
                 Console.WriteLine("Getting pakketen");
@@ -337,11 +362,16 @@ namespace Voedselverspilling.Web.Controllers
                 Is18 = m.Is18
             }).ToList();
 
+            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+            DateOnly alocohol = today.AddYears(-18);
+
+
             foreach (var mealbox in mealboxModels)
             {
+                
                 foreach (var reservering in reserveringModels)
                 {
-                    if (mealbox.Id == reservering.PakketId)
+                    if (mealbox.Id == reservering.PakketId && student.GeboorteDatum <= alocohol)
                     {
                         mealbox.GereserveerdDoor = reservering.StudentId;
                         mealbox.OphaalTijd = reservering.TijdOpgehaald;
@@ -466,6 +496,32 @@ namespace Voedselverspilling.Web.Controllers
             return products; // Geef de lijst van producten terug
         }
 
+        private async Task<ReserveringModel> GetReserveringByPakketId(int pakketId)
+        {
+            List<ReserveringModel> reserverings = new List<ReserveringModel>();
+            HttpResponseMessage response = await _httpClient.GetAsync($"{_apiBaseUrl}/Reservering");
+            if (response.IsSuccessStatusCode)
+            {
+                string responseBody = await response.Content.ReadAsStringAsync();
+                reserverings = JsonSerializer.Deserialize<List<ReserveringModel>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            else
+            {
+                // Hier kun je eventueel foutafhandeling doen, bijvoorbeeld loggen
+                ModelState.AddModelError(string.Empty, "Fout bij het ophalen van de producten.");
+            }
+
+            foreach (var reservering in reserverings)
+            {
+                if(reservering.PakketId == pakketId)
+                {
+                    return reservering;
+                }
+            }
+            return null;
+
+
+        }
     }
 
 
