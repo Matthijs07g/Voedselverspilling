@@ -101,6 +101,22 @@ namespace Voedselverspilling.Web.Controllers
 
             KantineWorker worker = await GetLoggedWorker();
 
+            HttpResponseMessage kantine = await _httpClient.GetAsync($"{_apiBaseUrl}/kantine/{worker.KantineId}");
+            if (kantine.IsSuccessStatusCode)
+            {
+
+                string responseBody = await kantine.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<Kantine>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+
+                if (mealboxCreateModel.Mealbox.IsWarm == true && result.IsWarm == false)
+                {
+                    ModelState.AddModelError(string.Empty, "Kan geen warm eten serveren.");
+                    mealboxCreateModel.AvailableProducts = await GetAvailableProducts();
+                    return View(mealboxCreateModel);
+                }
+            }
+
             // Create new pakket object from the model
             var newPakket = new Pakket
             {
@@ -110,6 +126,7 @@ namespace Voedselverspilling.Web.Controllers
                 KantineId = worker.KantineId,
                 Type = mealboxCreateModel.Mealbox.Type,
                 Is18 = mealboxCreateModel.Mealbox.Is18,
+                IsWarm = mealboxCreateModel.Mealbox.IsWarm,
                 ProductenId = mealboxCreateModel.SelectedProductIds // Use selected product IDs
             };
 
@@ -236,6 +253,21 @@ namespace Voedselverspilling.Web.Controllers
 
                 KantineWorker worker = await GetLoggedWorker();
 
+                HttpResponseMessage kantine = await _httpClient.GetAsync($"{_apiBaseUrl}/kantine/{worker.KantineId}");
+                if (kantine.IsSuccessStatusCode) {
+
+                    string responseBody = await kantine.Content.ReadAsStringAsync();
+                    var result = JsonSerializer.Deserialize<Kantine>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+
+                    if (viewModel.Mealbox.IsWarm == true && result.IsWarm == false)
+                    {
+                        ModelState.AddModelError(string.Empty, "Kan geen warm eten serveren/");
+                        viewModel.AvailableProducts = await GetAvailableProducts();
+                        return View(viewModel);
+                    }
+                }
+
                 // Create new pakket object from the model
                 var newPakket = new Pakket
                 {
@@ -245,6 +277,7 @@ namespace Voedselverspilling.Web.Controllers
                     KantineId = worker.KantineId,
                     Type = viewModel.Mealbox.Type,
                     Is18 = viewModel.Mealbox.Is18,
+                    IsWarm = viewModel.Mealbox.IsWarm,
                     ProductenId = viewModel.SelectedProductIds // Use selected product IDs
                 };
 
@@ -359,7 +392,8 @@ namespace Voedselverspilling.Web.Controllers
                 KantineId = m.KantineId,
                 Prijs = m.Prijs,
                 Type = m.Type,
-                Is18 = m.Is18
+                Is18 = m.Is18,
+                IsWarm = m.IsWarm,
             }).ToList();
 
             DateOnly today = DateOnly.FromDateTime(DateTime.Today);
@@ -371,7 +405,7 @@ namespace Voedselverspilling.Web.Controllers
                 
                 foreach (var reservering in reserveringModels)
                 {
-                    if (mealbox.Id == reservering.PakketId && student.GeboorteDatum <= alocohol)
+                    if (mealbox.Id == reservering.PakketId)
                     {
                         mealbox.GereserveerdDoor = reservering.StudentId;
                         mealbox.OphaalTijd = reservering.TijdOpgehaald;

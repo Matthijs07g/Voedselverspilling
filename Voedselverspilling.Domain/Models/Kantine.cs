@@ -11,8 +11,8 @@ namespace Voedselverspilling.Domain.Models
     {
         [Key]
         public int Id { get; set; }
-        public string? Stad {  get; set; }
-        public string? Locatie { get; set; }
-        public Boolean IsWarm { get; set; }
+        public required string Stad {  get; set; }
+        public required string Locatie { get; set; }
+        public required Boolean IsWarm { get; set; }
     }
 }

@@ -17,6 +17,7 @@ namespace Voedselverspilling.Domain.Models
         public required string Stad {  get; set; }
         public required int KantineId { get; set; }
         public Boolean Is18 {  get; set; }
+        public Boolean IsWarm {  get; set; }
         public double Prijs { get; set; }
         public string? Type { get; set; }
     }

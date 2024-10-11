@@ -15,6 +15,7 @@
         <p><strong>Prijs:</strong> @(Model.MealboxModel.Prijs.ToString("C"))</p>
         <p><strong>Type:</strong> @(Model.MealboxModel.Type ?? "N/A")</p>
         <p><strong>Alcohol?:</strong> @(Model.MealboxModel.Is18 ? "Ja" : "Nee")</p>
+        <p><strong>Warme maaltijd?:</strong> @(Model.MealboxModel.IsWarm ? "Ja" : "Nee")</p>
 
         @if (Model.Products != null && Model.Products.Count > 0)
         {
@@ -37,6 +38,10 @@
         @if(User.IsInRole("Admin") || User.IsInRole("Worker")){
             <a asp-action="MealboxEdit" asp-route-id="@Model.MealboxModel.Id" class="btn btn-primary">Bewerken</a>
             <a asp-action="MealboxDelete" asp-route-id="@Model.MealboxModel.Id" class="btn btn-danger">Verwijderen</a>
+        }
+        @if (User.IsInRole("Student"))
+        {
+            <a asp-action="MealboxReserveer" asp-route-id="@Model.MealboxModel.Id" class="btn btn-success">Reserveren</a>
         }
         <a asp-action="Mealboxes" class="btn btn-secondary">Terug naar lijst</a>
     </div>

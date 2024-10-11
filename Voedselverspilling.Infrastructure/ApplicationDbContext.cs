@@ -42,6 +42,16 @@ namespace Voedselverspilling.Infrastructure
                 Stad = "Breda",
             };
 
+            var student2 = new Student()
+            {
+                Id = 2,
+                Naam = "Theo Jansen",
+                GeboorteDatum = new DateOnly(2010, 5, 15),
+                StudentNummer = 2286230,
+                Emailaddress = "t.jansen@student.avans.nl",
+                Stad = "Breda"
+            };
+
             var werker1 = new KantineWorker()
             {
                 Id = 1,
@@ -50,6 +60,16 @@ namespace Voedselverspilling.Infrastructure
                 Email = "i.jansen@avans.nl",
                 Stad = "Breda",
                 KantineId = 1
+            };
+
+            var werker2 = new KantineWorker()
+            {
+                Id = 2,
+                Naam = "Henk van Basten",
+                PersoneelsNummer = 2,
+                Email = "h.basten@avans.nl",
+                Stad = "Breda",
+                KantineId = 2
             };
 
             var product1 = new Product()
@@ -68,6 +88,14 @@ namespace Voedselverspilling.Infrastructure
                 IsWarm = true,
             };
 
+            var kantineLC = new Kantine()
+            {
+                Id = 2,
+                Stad = "Breda",
+                Locatie = "LC",
+                IsWarm = false,
+            };
+
             var pakket1 = new Pakket()
             {
                 Id = 1,
@@ -76,6 +104,7 @@ namespace Voedselverspilling.Infrastructure
                 Stad = "Breda",
                 KantineId = 1,
                 Is18 = false,
+                IsWarm = true,
                 Prijs = 10.99,
                 Type = "Warm"
             };
@@ -91,7 +120,8 @@ namespace Voedselverspilling.Infrastructure
 
 
             modelBuilder.Entity<Student>().HasData(
-                student1
+                student1,
+                student2
                 );
 
             modelBuilder.Entity<Product>().HasData(
@@ -99,7 +129,8 @@ namespace Voedselverspilling.Infrastructure
                 );
 
             modelBuilder.Entity<Kantine>().HasData(
-                kantineLA
+                kantineLA,
+                kantineLC
                 );
 
             modelBuilder.Entity<Pakket>().HasData(
@@ -111,7 +142,8 @@ namespace Voedselverspilling.Infrastructure
                 );
 
             modelBuilder.Entity<KantineWorker>().HasData(
-                werker1
+                werker1,
+                werker2
                 );
         }
     }

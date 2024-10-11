@@ -29,7 +29,8 @@ else
                                         <strong>Stad:</strong> @mealbox.Stad <br />
                                         <strong>Prijs:</strong> @(mealbox.Prijs.ToString("C")) <br />
                                         <strong>Type:</strong> @mealbox.Type <br />
-                                        <strong>Alcohol:</strong> @(mealbox.Is18 ? "Ja" : "Nee")
+                                        <strong>Alcohol:</strong> @(mealbox.Is18 ? "Ja" : "Nee") <br />
+                                        <strong>Warme maaltijd:</strong> @(mealbox.IsWarm ? "Ja" : "Nee")
                                     </p>
                                 </div>
                             </div>

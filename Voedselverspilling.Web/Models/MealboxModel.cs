@@ -28,6 +28,8 @@ namespace Voedselverspilling.Web.Models
         [Display(Name = "Alcohol")]
         public bool Is18 { get; set; }
 
+        [Display(Name = "Warm")]
+        public bool IsWarm {  get; set; }
 
 
 
