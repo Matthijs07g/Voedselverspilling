@@ -20,12 +20,13 @@
         <input asp-for="Mealbox.Type" class="form-control" />
         <span asp-validation-for="Mealbox.Type" class="text-danger"></span>
     </div>
-
+    <br />
     <div class="form-group form-check">
+        <label>Warm</label>
         <input asp-for="Mealbox.IsWarm" class="form-check-input" />
         <label asp-for="Mealbox.IsWarm" class="form-check-label">Warm Eten?</label>
     </div>
-
+    <br />
     <div class="form-group">
         <label>Producten</label>
         <div>
@@ -42,7 +43,7 @@
             }
         </div>
     </div>
-
+    <br />
     <button type="submit" class="btn btn-primary">Pakket Aanmaken</button>
 </form>
 

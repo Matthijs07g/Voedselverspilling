@@ -37,6 +37,8 @@ namespace Voedselverspilling.Web.Models
 
         public DateTime? OphaalTijd { get; set; } = null;
 
+        public int? UserKantineId { get; set; } = null;
+
         // Eventueel een lijst van Producten als je dat wilt
         public List<int> ProductenId { get; set; } = new List<int>(); // Dit kan een lijst van IDs zijn van de producten in de mealbox
     }

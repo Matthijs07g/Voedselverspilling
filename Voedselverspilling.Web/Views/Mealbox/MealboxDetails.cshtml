@@ -39,7 +39,7 @@
             <a asp-action="MealboxEdit" asp-route-id="@Model.MealboxModel.Id" class="btn btn-primary">Bewerken</a>
             <a asp-action="MealboxDelete" asp-route-id="@Model.MealboxModel.Id" class="btn btn-danger">Verwijderen</a>
         }
-        @if (User.IsInRole("Student"))
+        @if (User.IsInRole("Student") && Model.MealboxModel.GereserveerdDoor == null)
         {
             <a asp-action="MealboxReserveer" asp-route-id="@Model.MealboxModel.Id" class="btn btn-success">Reserveren</a>
         }

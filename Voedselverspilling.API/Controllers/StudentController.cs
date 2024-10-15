@@ -22,7 +22,7 @@ namespace Voedselverspilling.API.Controllers
 
             if (students == null)
             {
-                return BadRequest("No Reserveringen found");
+                return BadRequest("No Students found");
             }
             else
             {
@@ -37,7 +37,7 @@ namespace Voedselverspilling.API.Controllers
             Student student = await _studentService.GetStudentByIdAsync(id);
             if (student == null)
             {
-                return BadRequest("Not Reservering found");
+                return BadRequest("Not student found");
             }
             else
             {

@@ -23,6 +23,20 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
+                        @if (User.IsInRole("Worker"))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link text-dark dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Paketten
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Mealbox" asp-action="Mealboxes">Ander aanbod</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Mealbox" asp-action="MyMealboxes">Ons aanbod</a></li>
+                                </ul>
+                            </li>
+                        } 
+                        @if (User.IsInRole("Admin") || User.IsInRole("Student"))
+                        {
                         <li class="nav-item dropdown">
                             <a class="nav-link text-dark dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Paketten
@@ -32,6 +46,7 @@
                                 <li><a class="dropdown-item" asp-controller="Mealbox" asp-action="MyMealboxes">Mijn Paketten</a></li>
                             </ul>
                         </li>
+                        }
                     </ul>
                     <ul class="navbar-nav ml-auto">
                         @if (User.Identity.IsAuthenticated)

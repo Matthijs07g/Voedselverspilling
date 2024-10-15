@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Voedselverspilling.Application.Services;
 using Voedselverspilling.Domain.Models;
 using Voedselverspilling.DomainServices.Services;
 using Voedselverspilling.Infrastructure.Services;
@@ -44,6 +45,24 @@ namespace Voedselverspilling.API.Controllers
             {
                 return Ok(reservering);
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddReservering([FromBody] Reservering reservering)
+        {
+            if (reservering == null)
+            {
+                return BadRequest("Reservering object is null.");
+            }
+
+            await _reserveringService.AddReserveringAsync(reservering);
+            return CreatedAtAction(nameof(reservering), new { id = reservering.ReserveringId }, reservering);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task DeleteReservering(int id)
+        {
+            await _reserveringService.DeleteReserveringAsync(id);
         }
     }
 }

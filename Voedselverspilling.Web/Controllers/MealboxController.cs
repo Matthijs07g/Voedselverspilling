@@ -25,17 +25,29 @@ namespace Voedselverspilling.Web.Controllers
         public async Task<IActionResult> MealboxesAsync()
         {
             List<Pakket> mealboxes = new List<Pakket>();
-
             var mealboxModels = await GetAllMealboxes();
 
             List<MealboxModel> openMealboxes = new List<MealboxModel>();
-
-            foreach (var mealbox in mealboxModels)
+            if (User.IsInRole("Worker"))
             {
-                if(mealbox.GereserveerdDoor == null)
+                KantineWorker kantineWorker = await GetLoggedWorker();
+                foreach (var item in mealboxModels)
                 {
-                    openMealboxes.Add(mealbox);
-                }                
+                    if(item.KantineId != kantineWorker.KantineId)
+                    {
+                        openMealboxes.Add(item);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var mealbox in mealboxModels)
+                {
+                    if (mealbox.GereserveerdDoor == null)
+                    {
+                        openMealboxes.Add(mealbox);
+                    }
+                }
             }
 
             return View(openMealboxes);
@@ -43,24 +55,40 @@ namespace Voedselverspilling.Web.Controllers
 
         public async Task<IActionResult> MyMealboxesAsync()
         {
-            Student student = await GetLoggedStudent();
+            
 
             var mealboxModels = GetAllMealboxes();
             
             List<MealboxModel> result = await mealboxModels;
             List<MealboxModel> myMealboxes = new List<MealboxModel>();
 
-            if (student != null) {
+            if (User.IsInRole("Worker"))
+            {
+                KantineWorker kantineWorker = await GetLoggedWorker();
                 foreach (var item in result)
                 {
-                    if (item.GereserveerdDoor == student.Id)
+                    if(item.KantineId == kantineWorker.KantineId)
                     {
                         myMealboxes.Add(item);
                     }
                 }
             }
-                
-            
+            if (User.IsInRole("Student"))
+            {
+                Student student = await GetLoggedStudent();
+
+                if (student != null)
+                {
+                    foreach (var item in result)
+                    {
+                        if (item.GereserveerdDoor == student.Id)
+                        {
+
+                            myMealboxes.Add(item);
+                        }
+                    }
+                }
+            }
             return View(myMealboxes);
         }
 
@@ -150,9 +178,6 @@ namespace Voedselverspilling.Web.Controllers
             return View(mealboxCreateModel); // Return to the view with the current model
         }
 
-
-
-
         public async Task<IActionResult> MealboxDetails(int id)
         {
             // Fetch mealbox details from the API or database
@@ -185,6 +210,14 @@ namespace Voedselverspilling.Web.Controllers
                     }
                 }
 
+                ReserveringModel reservering = await GetReserveringByPakketId(id);
+                Student student = await GetLoggedStudent();
+                if(reservering != null && student.Id == reservering.StudentId)
+                {
+                    mealbox.GereserveerdDoor = student.Id;
+                }
+
+
                 MealboxDetailModel mealboxDetailModel = new MealboxDetailModel()
                 {
                     MealboxModel = mealbox,
@@ -196,8 +229,6 @@ namespace Voedselverspilling.Web.Controllers
 
             return NotFound(); // Handle the case where the mealbox is not found
         }
-
-
 
         public async Task<IActionResult> MealboxEdit(int id)
         {
@@ -227,7 +258,6 @@ namespace Voedselverspilling.Web.Controllers
             return NotFound(); // If mealbox or products not found, return 404
         }
 
-        // POST: Update Mealbox (Handle form submission)
         [HttpPost]
         public async Task<IActionResult> MealboxEdit(MealboxEditModel viewModel)
         {
@@ -302,9 +332,6 @@ namespace Voedselverspilling.Web.Controllers
             return View(viewModel);
         }
 
-
-
-
         public async Task<IActionResult> MealboxDelete(int id)
         {
             var reservering = await GetReserveringByPakketId(id);
@@ -323,6 +350,91 @@ namespace Voedselverspilling.Web.Controllers
             ModelState.AddModelError(string.Empty, "Failed to delete the mealbox. Already has a reservering");
             return RedirectToAction("Mealboxes");
         }
+
+        public async Task<IActionResult> MealboxReserveer(int id)
+        {
+            Console.WriteLine("Starting reserveren process");
+            
+            var reservering = await GetReserveringByPakketId(id);
+            if(reservering != null)
+            {
+                Console.WriteLine("Error reservering bestaat al");
+                ModelState.AddModelError(string.Empty, "Pakket heeft al een reservering");
+                return RedirectToAction("MyMealboxes");
+            }
+            else
+            {
+                Student student = await GetLoggedStudent();
+
+                Reservering newReservering = new Reservering
+                {
+                    ReservaringDatum = new DateTime(),
+                    IsOpgehaald = false,
+                    TijdOpgehaald = new DateTime().AddDays(3),
+                    StudentId = student.Id,
+                    PakketId = id,
+                };
+
+                var jsonPakket = JsonSerializer.Serialize(newReservering);
+                var content = new StringContent(jsonPakket, Encoding.UTF8, "application/json");
+
+                Request.Cookies.TryGetValue("jwt", out var jwt);
+                Console.WriteLine($"JWT: {jwt}");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+                Console.WriteLine("Creating reservering");
+                HttpResponseMessage response = await _httpClient.PostAsync($"{_apiBaseUrl}/Reservering", content);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    Console.WriteLine("Unauthorized acces");
+                }
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("MyMealboxes");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+                    return RedirectToAction("MyMealboxes");
+                }
+            }
+        }
+
+        public async Task<IActionResult> CancelReservation(MealboxDetailModel model)
+        {
+            ReserveringModel reservering = await GetReserveringByPakketId(model.MealboxModel.Id);
+            if (reservering == null)
+            {
+                ModelState.AddModelError(string.Empty, "Reservering niet gevonden");
+                return View(model);
+            }
+            else
+            {
+                Request.Cookies.TryGetValue("jwt", out var jwt);
+                Console.WriteLine($"JWT: {jwt}");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+                HttpResponseMessage response = await _httpClient.DeleteAsync($"{_apiBaseUrl}/Reservering/{reservering.ReserveringId}");
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    Console.WriteLine("Unauthorized acces");
+                }
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("MyMealboxes");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Server error. Please contact administrator.");
+                    return View(model);
+                }
+            }
+        }
+
+
+
 
         private async Task<List<MealboxModel>> GetAllMealboxes()
         {
@@ -412,6 +524,8 @@ namespace Voedselverspilling.Web.Controllers
                     }
                 }
             }
+            
+
             return mealboxModels;
         }
     
@@ -530,7 +644,7 @@ namespace Voedselverspilling.Web.Controllers
             return products; // Geef de lijst van producten terug
         }
 
-        private async Task<ReserveringModel> GetReserveringByPakketId(int pakketId)
+        private async Task<ReserveringModel?>? GetReserveringByPakketId(int pakketId)
         {
             List<ReserveringModel> reserverings = new List<ReserveringModel>();
             HttpResponseMessage response = await _httpClient.GetAsync($"{_apiBaseUrl}/Reservering");
@@ -556,7 +670,6 @@ namespace Voedselverspilling.Web.Controllers
 
 
         }
+    
     }
-
-
 }

@@ -19,8 +19,6 @@ else
             {
                 <div class="col-md-5 mb-4 mx-3">
                     <!-- Two cards per row (approx 50% width) -->
-                    @if (User.IsInRole("Worker"))
-                    {
                         <a asp-action="MealboxDetails" asp-route-id="@mealbox.Id" class="text-decoration-none text-dark">
                             <div class="card h-100">
                                 <div class="card-body">
@@ -35,23 +33,6 @@ else
                                 </div>
                             </div>
                         </a>
-                    }
-                    else
-                    {
-                        <a asp-action="MealboxDetails" asp-route-id="@mealbox.Id" class="text-decoration-none text-dark">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <h5 class="card-title text-center">@mealbox.Naam</h5>
-                                    <p class="card-text text-center">
-                                        <strong>Stad:</strong> @mealbox.Stad <br />
-                                        <strong>Prijs:</strong> @(mealbox.Prijs.ToString("C")) <br />
-                                        <strong>Type:</strong> @mealbox.Type <br />
-                                        <strong>Alcohol:</strong> @(mealbox.Is18 ? "Ja" : "Nee")
-                                    </p>
-                                </div>
-                            </div>
-                        </a>
-                    }
                 </div>
             }
         </div>
