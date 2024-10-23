@@ -210,9 +210,9 @@ namespace Voedselverspilling.Web.Controllers
                     }
                 }
 
-                ReserveringModel reservering = await GetReserveringByPakketId(id);
-                Student student = await GetLoggedStudent();
-                if(reservering != null && student.Id == reservering.StudentId)
+                ReserveringModel? reservering = await GetReserveringByPakketId(id);
+                Student? student = await GetLoggedStudent();
+                if(student != null && reservering != null && student.Id == reservering.StudentId)
                 {
                     mealbox.GereserveerdDoor = student.Id;
                 }
@@ -368,9 +368,9 @@ namespace Voedselverspilling.Web.Controllers
 
                 Reservering newReservering = new Reservering
                 {
-                    ReservaringDatum = new DateTime(),
+                    ReservaringDatum = DateTime.Today,
                     IsOpgehaald = false,
-                    TijdOpgehaald = new DateTime().AddDays(3),
+                    TijdOpgehaald = DateTime.Today.AddDays(3),
                     StudentId = student.Id,
                     PakketId = id,
                 };
@@ -529,7 +529,7 @@ namespace Voedselverspilling.Web.Controllers
             return mealboxModels;
         }
     
-        private async Task<Student> GetLoggedStudent()
+        private async Task<Student?>? GetLoggedStudent()
         {
             List<Student> students = new List<Student>();
 

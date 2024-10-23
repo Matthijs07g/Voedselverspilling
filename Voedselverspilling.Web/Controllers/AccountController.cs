@@ -14,6 +14,7 @@ namespace Voedselverspilling.Web.Controllers
     using Voedselverspilling.Domain.Models;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
+    using System.Net.Http.Headers;
 
     public class AccountController : Controller
     {
@@ -86,6 +87,8 @@ namespace Voedselverspilling.Web.Controllers
                 SameSite = SameSiteMode.Strict, // Prevent CSRF attacks
                 Expires = DateTime.UtcNow.AddMinutes(30) // Adjust expiration as needed
             };
+
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtResponse.Token);
 
             // Step 5: Add the JWT to a secure cookie
             Response.Cookies.Append("jwt", jwtResponse.Token, cookieOptions);

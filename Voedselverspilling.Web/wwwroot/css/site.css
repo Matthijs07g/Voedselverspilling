@@ -1,22 +1,89 @@
+:root {
+    --comp-rood-1: #DB0900;
+    --comp-groen-1: #00DB4C;
+    --comp-bordeaux-1: #9E3834;
+    --comp-groen-2: #2D864C;
+    --comp-lichtbruin-1: #5C3E3D;
+    --comp-donkergroen-1: #223328;
+    --mono-rood-1: #E51A00;
+    --mono-rood-2: #BB311F;
+    --mono-rood-3: #913B30;
+    --mono-rood-4: #663933;
+    --mono-donkerbruin-1: #3C2A28;
+    --mono-lichtzwart-1: #38302F;
+}
+
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+    background-color: var(--mono-lichtzwart-1);
+    color: white;
 }
+
+nav.bg-white, .navbar-brand, .nav-link, .dropdown-menu, .dropdown-item {
+    background-color: var(--mono-donkerbruin-1) !important;
+    color: white !important;
+}
+
+.navbar-text {
+    color: lightgray;
+}
+
+.text-muted {
+    color: lightgrey !important;
+}
+
+.card-header, .card-footer {
+    background-color: var(--mono-donkerbruin-1);
+    color: white
+}
+
+.card-body {
+    background-color: var(--mono-lichtzwart-1);
+    color: white;
+}
+
+.btn-secondary, .btn-secondary:hover, .btn-success, .btn-success:hover {
+    background-color: var(--mono-rood-3);
+    border-color: lightgray;
+    font-family: "Open sans";
+}
+
+.btn-primary, .btn-primary:hover {
+    background-color: var(--mono-donkerbruin-1);
+    font-family: "Open sans";
+    border-color: lightgrey;
+}
+
+.btn-danger, .btn-danger:hover {
+    background-color: var(--mono-rood-2);
+    font-family: "Open sans";
+}
+
+h1, h2, h4 {
+    font-family: "Montserrat";
+}
+
+p, strong, li, nav, label{
+    font-family: "Open sans";
+}
+
+

@@ -14,8 +14,8 @@
         <p><strong>Stad:</strong> @Model.MealboxModel.Stad</p>
         <p><strong>Prijs:</strong> @(Model.MealboxModel.Prijs.ToString("C"))</p>
         <p><strong>Type:</strong> @(Model.MealboxModel.Type ?? "N/A")</p>
-        <p><strong>Alcohol?:</strong> @(Model.MealboxModel.Is18 ? "Ja" : "Nee")</p>
-        <p><strong>Warme maaltijd?:</strong> @(Model.MealboxModel.IsWarm ? "Ja" : "Nee")</p>
+        <p><strong>Alcohol:</strong> @(Model.MealboxModel.Is18 ? "Ja" : "Nee")</p>
+        <p><strong>Warme maaltijd:</strong> @(Model.MealboxModel.IsWarm ? "Ja" : "Nee")</p>
 
         @if (Model.Products != null && Model.Products.Count > 0)
         {
@@ -25,7 +25,7 @@
                 {
                     <li>Naam: @product.Naam</li> <!-- Replace this with real product names or details if available -->
                     <li>Alcohol: @(product.IsAlcohol ? "Ja" : "Nee")</li>
-                    <li>Foto: @product.Foto</li>
+                    <li>Foto: <img src="@product.Foto" width="200" /></li>
                 }
             </ul>
         }

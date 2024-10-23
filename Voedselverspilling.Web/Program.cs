@@ -153,6 +153,32 @@ async Task SeedRolesAndUsersAsync(UserManager<AppIdentity> userManager, RoleMana
         }
     }
 
+    var workerEmail1 = "h.basten@avans.nl";
+    var workerUser1 = await userManager.FindByEmailAsync(workerEmail1);
+    if (workerUser1 == null)
+    {
+        var worker = new AppIdentity
+        {
+            UserName = workerEmail1,
+            Email = workerEmail1,
+            Rol = "Worker", // Ensure your AppIdentity class has a property for roles if needed
+            EmailConfirmed = true
+        };
+
+        var password = "123"; // Secure password
+        var createWorker = await userManager.CreateAsync(worker, password);
+
+        if (createWorker.Succeeded)
+        {
+            await userManager.AddToRoleAsync(worker, "Worker");
+            Console.WriteLine($"Worker user {workerEmail} created successfully.");
+        }
+        else
+        {
+            Console.WriteLine($"Failed to create Worker user: {string.Join(", ", createWorker.Errors.Select(e => e.Description))}");
+        }
+    }
+
     // Seed Student user
     var studentEmail = "mmj.vangastel@student.avans.nl";
     var studentUser = await userManager.FindByEmailAsync(studentEmail);

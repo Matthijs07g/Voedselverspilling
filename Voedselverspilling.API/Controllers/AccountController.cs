@@ -64,7 +64,7 @@ namespace Voedselverspilling.API.Controllers
             new Claim(JwtRegisteredClaimNames.Sub, user.Email),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Role, "User") // You can add roles dynamically if needed
+            new Claim(ClaimTypes.Role, user.Rol) // You can add roles dynamically if needed
         };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:SecretKey"]));

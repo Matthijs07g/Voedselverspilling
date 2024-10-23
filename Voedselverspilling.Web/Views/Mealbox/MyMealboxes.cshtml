@@ -42,3 +42,9 @@ else
         </div>
     </div>
 }
+@if (User.IsInRole("Worker"))
+{
+    <div class="text-center mt-4">
+        <a asp-action="MealboxAdd" class="btn btn-success">Nieuwe Mealbox Toevoegen</a>
+    </div>
+}
