@@ -24,8 +24,8 @@ namespace Voedselverspilling.Infrastructure.Repositories
         public async Task<AppIdentity> LoginAsync(LoginRequest loginRequest)
         {
             // Step 1: Check if the user exists
-            var user = await _userManager.Users
-                .FirstOrDefaultAsync(u => u.Email == loginRequest.Email);
+            var user = _userManager.Users
+                .FirstOrDefault(u => u.Email == loginRequest.Email);
 
             if (user == null)
             {
