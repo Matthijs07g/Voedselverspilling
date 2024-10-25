@@ -10,7 +10,7 @@ using Voedselverspilling.Infrastructure;
 using Voedselverspilling.Infrastructure.Repositories;
 using Xunit;
 
-namespace Voedselverspilling.Domain.Test
+namespace Voedselverspilling.Domain.Test.Tests
 {
     public class KantineRepositoryTests : IDisposable
     {
