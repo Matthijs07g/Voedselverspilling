@@ -11,8 +11,9 @@ namespace Voedselverspilling.DomainServices.Interfaces
     {
         Task<Student> GetByIdAsync(int id);
         Task<IEnumerable<Student>> GetAllAsync();
-        Task AddAsync(Student student);
-        Task UpdateAsync(Student student);
+        Task<Student> AddAsync(Student student);
+        Task<Student> UpdateAsync(Student student);
         Task DeleteAsync(int id);
+        Task<Student> GetByEmailAsync(string Email);
     }
 }

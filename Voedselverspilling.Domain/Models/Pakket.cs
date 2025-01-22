@@ -23,9 +23,9 @@ namespace Voedselverspilling.Domain.Models
         public ICollection<Product> Producten { get; set; } = null!;
 
         public Student? ReservedBy { get; set; }
-        public DateTime ReservaringDatum { get; set; }
+        public DateTime? ReservaringDatum { get; set; }
         public Boolean IsOpgehaald { get; set; }
-        public DateTime TijdOpgehaald { get; set; }
+        public DateTime EindDatum { get; set; }
     }
 
     enum maaltijdType

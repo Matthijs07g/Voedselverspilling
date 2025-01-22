@@ -1,16 +1,11 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Voedselverspilling.Application.Services;
-using Voedselverspilling.Domain.Interfaces;
-using Voedselverspilling.Domain.IRepositories;
+using Voedselverspilling.DomainServices.Interfaces;
+using Voedselverspilling.DomainServices.IRepositories;
 using Voedselverspilling.Domain.Models;
-using Voedselverspilling.DomainServices.IServices;
-using Voedselverspilling.DomainServices.Services;
 using Voedselverspilling.Infrastructure;
 using Voedselverspilling.Infrastructure.Repositories;
-using Voedselverspilling.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,20 +41,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Account/AccessDenied"; // Redirect here on access denied
     });
 
-// Add services to the container.
-builder.Services.AddScoped<IStudentService, StudentService>();
-builder.Services.AddScoped<IKantineService, KantineService>();
-builder.Services.AddScoped<IKantineWorkerService, KantineWorkerService>();
-builder.Services.AddScoped<IPakketService, PakketService>();
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<IReserveringService, ReserveringService>();
-builder.Services.AddScoped<IAccountService, AccountService>();
-
 // Add repositories
 builder.Services.AddScoped<IKantineRepository, KantineRepository>();
 builder.Services.AddScoped<IKantineWorkerRepository, KantineWorkerRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IReserveringRepository, ReserveringRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IPakketRepository, PakketRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
@@ -79,6 +64,7 @@ using (var scope = app.Services.CreateScope())
 
     // Seed roles and users
     var userManager = services.GetRequiredService<UserManager<AppIdentity>>();
+    var signInManager = services.GetRequiredService<SignInManager<AppIdentity>>();
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
     await SeedRolesAndUsersAsync(userManager, roleManager);

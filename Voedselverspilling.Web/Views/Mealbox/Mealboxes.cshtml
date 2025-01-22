@@ -6,38 +6,34 @@
 
 <h1 class="text-center">Lijst van Pakketen</h1>
 
-@if (Model == null || !Model.Any())
-{
-    <p class="text-center">Geen pakketen beschikbaar</p>
-}
-else
-{
-    <div class="container">
-        <div class="row justify-content-center">
-            <!-- Center the row of cards -->
-            @foreach (var mealbox in Model)
-            {
-                <div class="col-md-5 mb-4 mx-3">
-                    <!-- Two cards per row (approx 50% width) -->
-                        <a asp-action="MealboxDetails" asp-route-id="@mealbox.Id" class="text-decoration-none text-dark">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <h5 class="card-title text-center">@mealbox.Naam</h5>
-                                    <p class="card-text text-center">
-                                        <strong>Stad:</strong> @mealbox.Stad <br />
-                                        <strong>Prijs:</strong> @(mealbox.Prijs.ToString("C")) <br />
-                                        <strong>Type:</strong> @mealbox.Type <br />
-                                        <strong>Alcohol:</strong> @(mealbox.Is18 ? "Ja" : "Nee") <br />
-                                        <strong>Warme maaltijd:</strong> @(mealbox.IsWarm ? "Ja" : "Nee")
-                                    </p>
-                                </div>
+
+
+<div class="container">
+    <div class="row justify-content-center">
+        <!-- Center the row of cards -->
+        @foreach (var mealbox in Model)
+        {
+            <div class="col-md-5 mb-4 mx-3">
+                <!-- Two cards per row (approx 50% width) -->
+                    <a asp-action="MealboxDetails" asp-route-id="@mealbox.Id" class="text-decoration-none text-dark">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-center">@mealbox.Naam</h5>
+                                <p class="card-text text-center">
+                                    <strong>Stad:</strong> @mealbox.Stad <br />
+                                    <strong>Prijs:</strong> @(mealbox.Prijs.ToString("C")) <br />
+                                    <strong>Type:</strong> @mealbox.Type <br />
+                                    <strong>Alcohol:</strong> @(mealbox.Is18 ? "Ja" : "Nee") <br />
+                                    <strong>Warme maaltijd:</strong> @(mealbox.IsWarm ? "Ja" : "Nee")
+                                </p>
                             </div>
-                        </a>
-                </div>
-            }
-        </div>
+                        </div>
+                    </a>
+            </div>
+        }
     </div>
-}
+</div>
+
 @if (User.IsInRole("Worker"))
 {
     <div class="text-center mt-4">

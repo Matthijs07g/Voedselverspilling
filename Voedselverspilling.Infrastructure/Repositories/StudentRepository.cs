@@ -40,7 +40,7 @@ namespace Voedselverspilling.Infrastructure.Repositories
         public async Task<Student> UpdateAsync(Student student)
         {
             var studentOld = await _context.Studenten.FindAsync(student.Id);
-            if(studentOld == null)
+            if (studentOld == null)
             {
                 throw new Exception("Student not found");
             }
@@ -59,6 +59,16 @@ namespace Voedselverspilling.Infrastructure.Repositories
 
             _context.Studenten.Remove(student);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<Student> GetByEmailAsync(string email)
+        {
+            var student = await _context.Studenten.FirstOrDefaultAsync(x => x.Emailaddress == email);
+            if (student == null)
+            {
+                throw new KeyNotFoundException($"Student with email {email} not found");
+            }
+            return student;
         }
     }
 }

@@ -11,8 +11,11 @@ namespace Voedselverspilling.DomainServices.IRepositories
     {
         Task<Pakket> GetByIdAsync(int id);
         Task<IEnumerable<Pakket>> GetAllAsync();
-        Task AddAsync(Pakket pakket);
-        Task UpdateAsync(Pakket pakket);
+        Task<Pakket> AddAsync(Pakket pakket);
+        Task<Pakket> UpdateAsync(Pakket pakket);
         Task DeleteAsync(int id);
+        Task<IEnumerable<Pakket>> GetByEmailAsync(string Email);
+
+        Task<Pakket> ReservePakketAsync(int id, Student student);
     }
 }

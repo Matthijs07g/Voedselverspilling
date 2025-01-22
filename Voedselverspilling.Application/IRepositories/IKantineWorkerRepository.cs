@@ -11,8 +11,9 @@ namespace Voedselverspilling.DomainServices.IRepositories
     {
         Task<KantineWorker> GetByIdAsync(int id);
         Task<IEnumerable<KantineWorker>> GetAllAsync();
-        Task AddAsync(KantineWorker KantineWorker);
-        Task UpdateAsync(KantineWorker KantineWorker);
+        Task<KantineWorker> AddAsync(KantineWorker KantineWorker);
+        Task<KantineWorker> UpdateAsync(KantineWorker KantineWorker);
         Task DeleteAsync(int id);
+        Task<KantineWorker> GetByEmailAsync(string Email);
     }
 }

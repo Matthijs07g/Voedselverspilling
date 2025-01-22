@@ -24,20 +24,6 @@ namespace Voedselverspilling.Infrastructure
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            //var workerId1 = new AppIdentity()
-            //{
-            //    Id = 1,
-            //    Email = "i.jansen@avans.nl",
-            //    Rol = "Worker"
-            //};
-
-            //var studentId1 = new AppIdentity()
-            //{
-            //    Id = 2,
-            //    Email = "mmj.vangastel@student.avans.nl",
-            //    Rol = "Student"
-            //};
         }
     }
 }

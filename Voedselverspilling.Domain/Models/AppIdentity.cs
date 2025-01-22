@@ -10,9 +10,6 @@ namespace Voedselverspilling.Domain.Models
 {
     public class AppIdentity : IdentityUser
     {
-        [Key]
-        public int Id { get; set; }
-
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Invalid email format")]
         public required string Email { get; set; }

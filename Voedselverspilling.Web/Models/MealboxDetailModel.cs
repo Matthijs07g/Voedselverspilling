@@ -1,8 +1,10 @@
-﻿namespace Voedselverspilling.Web.Models
+﻿using Voedselverspilling.Domain.Models;
+
+namespace Voedselverspilling.Web.Models
 {
     public class MealboxDetailModel
     {
-        public MealboxModel MealboxModel { get; set; }
-        public List<ProductModel> Products { get; set; } = new List<ProductModel>();
+        public Pakket MealboxModel { get; set; }
+        public ICollection<Product> Products { get; set; }
     }
 }

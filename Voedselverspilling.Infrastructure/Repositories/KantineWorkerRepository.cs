@@ -11,7 +11,7 @@ namespace Voedselverspilling.Infrastructure.Repositories
 {
     public class KantineWorkerRepository : IKantineWorkerRepository
     {
-        private readonly ApplicationDbContext _context; 
+        private readonly ApplicationDbContext _context;
 
         public KantineWorkerRepository(ApplicationDbContext context)
         {
@@ -54,6 +54,16 @@ namespace Voedselverspilling.Infrastructure.Repositories
 
             _context.Medewerker.Remove(kantineWorker);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<KantineWorker> GetByEmailAsync(string email)
+        {
+            var kantineWorker = await _context.Medewerker.FirstOrDefaultAsync(x => x.Email == email);
+            if (kantineWorker == null)
+            {
+                throw new KeyNotFoundException($"KantineWorker with email {email} not found");
+            }
+            return kantineWorker;
         }
     }
 }

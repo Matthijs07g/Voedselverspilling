@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Voedselverspilling.Application.Services;
-using Voedselverspilling.Domain.IRepositories;
+using Voedselverspilling.DomainServices.IRepositories;
 using Voedselverspilling.Domain.Models;
 
 namespace Voedselverspilling.API.Controllers
@@ -12,11 +11,11 @@ namespace Voedselverspilling.API.Controllers
     //[Authorize]
     public class PakketController : ControllerBase
     {
-        private readonly IPakketService _pakketService;
+        private readonly IPakketRepository _pakketRepository;
 
-        public PakketController(IPakketService pakketService)
+        public PakketController(IPakketRepository pakketRepository)
         {
-            _pakketService = pakketService;
+            _pakketRepository = pakketRepository;
         }
 
 
@@ -24,10 +23,7 @@ namespace Voedselverspilling.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllPakketen()
         {
-            IEnumerable<Pakket> Pakketen = await _pakketService.GetAllPakketsAsync();
-            Request.Headers.TryGetValue("Authorization", out var jwt);
-            Console.WriteLine($"JWT: {jwt}");
-
+            IEnumerable<Pakket> Pakketen = await _pakketRepository.GetAllAsync();
 
             if (Pakketen == null)
             {
@@ -43,7 +39,7 @@ namespace Voedselverspilling.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPakketById(int id)
         {
-            Pakket Pakket = await _pakketService.GetPakketByIdAsync(id);
+            Pakket Pakket = await _pakketRepository.GetByIdAsync(id);
             if (Pakket == null)
             {
                 return BadRequest("Not Pakket found");
@@ -62,7 +58,7 @@ namespace Voedselverspilling.API.Controllers
                 return BadRequest("Pakket object is null.");
             }
 
-            await _pakketService.AddPakketAsync(Pakket);
+            await _pakketRepository.AddAsync(Pakket);
             return CreatedAtAction(nameof(AddPakket), new { id = Pakket.Id }, Pakket);
         }
 
@@ -77,7 +73,7 @@ namespace Voedselverspilling.API.Controllers
 
             Pakket.Id = id;
 
-            await _pakketService.UpdatePakketAsync(Pakket);
+            await _pakketRepository.UpdateAsync(Pakket);
             return Ok(Pakket);
         }
 
@@ -87,7 +83,7 @@ namespace Voedselverspilling.API.Controllers
         [HttpDelete("{id}")]
         public async Task DeletePakket(int id)
         {
-            await _pakketService.DeletePakketAsync(id);
+            await _pakketRepository.DeleteAsync(id);
         }
     }
 }

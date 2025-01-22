@@ -80,5 +80,30 @@ namespace Voedselverspilling.Infrastructure.Repositories
             await _context.SaveChangesAsync();
             
         }
+
+        public async Task<IEnumerable<Pakket>> GetByEmailAsync(string eMail)
+        {
+            return await _context.Pakketten
+                .Include(p => p.Producten)
+                .Where(x => x.ReservedBy.Emailaddress == eMail && x.ReservedBy !=null)
+                .ToListAsync();
+        }
+
+        public async Task<Pakket> ReservePakketAsync(int id, Student student)
+        {
+            var pakket = await _context.Pakketten
+                .Include(p => p.Producten)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            
+            if(pakket == null)
+            {
+                throw new Exception("Pakket not found");
+            }
+
+            pakket.ReservedBy = student;
+            _context.Entry(pakket).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return pakket;
+        }
     }
 }

@@ -18,7 +18,6 @@ namespace Voedselverspilling.Infrastructure
         public DbSet<Student> Studenten { get; set; }
         public DbSet<Pakket> Pakketten { get; set; }
         public DbSet<Kantine> Kantines { get; set; }
-        public DbSet<Reservering> Reserveringen { get; set; }
         public DbSet<Product> Producten { get; set; }
         public DbSet<KantineWorker> Medewerker { get; set; }
 
@@ -81,6 +80,14 @@ namespace Voedselverspilling.Infrastructure
                 Foto = "https://www.broodje.nl/wp-content/uploads/2022/03/lunch-broodje-zalm-luxe.jpg"
             };
 
+            var product2 = new Product()
+            {
+                Id = 2,
+                Naam = "Broodje kroket",
+                IsAlcohol = false,
+                Foto = "https://www.praktijkmik.nl/media/tz_portfolio_plus/article/cache/een-broodje-kroket-28_o.jpg"
+            };
+
             var kantineLA = new Kantine()
             {
                 Id = 1,
@@ -101,22 +108,31 @@ namespace Voedselverspilling.Infrastructure
             {
                 Id = 1,
                 Naam = "Zee eten",
-                ProductenId = new List<int> { 1 },
+                Producten = new List<Product> { product1 },
                 Stad = "Breda",
                 KantineId = 1,
                 Is18 = false,
                 IsWarm = true,
                 Prijs = 10.99,
-                Type = "Warm"
+                Type = "Warm",
+                EindDatum = new DateTime(2025, 1, 22)
             };
 
-            var reservering1 = new Reservering()
+            var pakket2 = new Pakket()
             {
-                ReserveringId = 1,
-                ReservaringDatum = new DateTime(2024, 9, 10),
+                Id = 2,
+                Naam = "Broodje kroket",
+                Producten = new List<Product> { product2 },
+                Stad = "Breda",
+                KantineId = 2,
+                Is18 = false,
+                IsWarm = true,
+                Prijs = 6.99,
+                Type = "Brood",
+                ReservedBy = student1,
+                ReservaringDatum = new DateTime(2025, 1, 15),
                 IsOpgehaald = false,
-                StudentId = 1,
-                PakketId = 1,
+                EindDatum = new DateTime(2025, 1, 22)
             };
 
 
@@ -126,7 +142,8 @@ namespace Voedselverspilling.Infrastructure
                 );
 
             modelBuilder.Entity<Product>().HasData(
-                product1
+                product1,
+                product2
                 );
 
             modelBuilder.Entity<Kantine>().HasData(
@@ -134,18 +151,29 @@ namespace Voedselverspilling.Infrastructure
                 kantineLC
                 );
 
-            modelBuilder.Entity<Pakket>().HasData(
-                pakket1
-                );
-
-            modelBuilder.Entity<Reservering>().HasData(
-                reservering1
-                );
-
             modelBuilder.Entity<KantineWorker>().HasData(
                 werker1,
                 werker2
                 );
+
+            modelBuilder.Entity<Pakket>()
+                .HasMany(p => p.Producten)
+                .WithMany()
+            .UsingEntity<Dictionary<string, object>>(
+                "PakketProduct",
+                x => x.HasOne<Product>().WithMany().HasForeignKey("ProductId"),
+                y => y.HasOne<Pakket>().WithMany().HasForeignKey("PakketId"),
+                xy =>
+                {
+                    xy.HasKey("ProductId", "PakketId");
+                    xy.HasData(
+                        new { ProductId = 1, PakketId = 1 },
+                        new { ProductId = 2, PakketId = 2 },
+                        new { ProductId = 1, PakketId = 2 },
+                        new { ProductId = 2, PakketId = 1 }
+
+                    );
+                });
         }
     }
 }
