@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Voedselverspilling.Domain.Models;
 
-namespace Voedselverspilling.Domain.IRepositories
+namespace Voedselverspilling.DomainServices.IRepositories
 {
     public interface IKantineWorkerRepository
     {

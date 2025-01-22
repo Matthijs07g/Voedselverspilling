@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Voedselverspilling.Domain.IRepositories;
+using Voedselverspilling.DomainServices.IRepositories;
 using Voedselverspilling.Domain.Models;
 
 namespace Voedselverspilling.Infrastructure.Repositories
@@ -20,34 +20,45 @@ namespace Voedselverspilling.Infrastructure.Repositories
 
         public async Task<Product> GetByIdAsync(int id)
         {
-            return await _context.Producten.FindAsync(id);
+            var product = await _context.Producten.FindAsync(id);
+            return product ?? throw new Exception("Product not found");
         }
 
         public async Task<IEnumerable<Product>> GetAllAsync()
         {
-            return await _context.Producten.ToListAsync();
+            var products = await _context.Producten.ToListAsync();
+            return products ?? throw new Exception("No products found");
         }
 
-        public async Task AddAsync(Product Product)
+        public async Task<Product> AddAsync(Product Product)
         {
             _context.Producten.Add(Product);
             await _context.SaveChangesAsync();
+            return Product;
         }
 
-        public async Task UpdateAsync(Product Product)
+        public async Task<Product> UpdateAsync(Product Product)
         {
+            var productOld = await _context.Producten.FindAsync(Product.Id);
+            if(productOld == null)
+            {
+                throw new Exception("Product not found");
+            }
             _context.Entry(Product).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+            return Product;
         }
 
         public async Task DeleteAsync(int id)
         {
             var Product = await _context.Producten.FindAsync(id);
-            if (Product != null)
+            if (Product == null)
             {
-                _context.Producten.Remove(Product);
-                await _context.SaveChangesAsync();
+                throw new Exception("Product not found");
             }
+
+            _context.Producten.Remove(Product);
+            await _context.SaveChangesAsync();
         }
     }
 }

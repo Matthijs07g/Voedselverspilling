@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Voedselverspilling.Domain.IRepositories;
+using Voedselverspilling.DomainServices.IRepositories;
 using Voedselverspilling.Domain.Models;
 
 namespace Voedselverspilling.Infrastructure.Repositories
@@ -20,7 +20,16 @@ namespace Voedselverspilling.Infrastructure.Repositories
 
         public async Task<Pakket> GetByIdAsync(int id)
         {
-            return await _context.Pakketten.FindAsync(id);
+            var pakket = await _context.Pakketten
+                .Include(p => p.Producten)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if(pakket == null)
+            {
+                throw new Exception("Pakket not found");
+            }
+
+            return pakket;
         }
 
         public async Task<IEnumerable<Pakket>> GetAllAsync()
@@ -28,26 +37,48 @@ namespace Voedselverspilling.Infrastructure.Repositories
             return await _context.Pakketten.ToListAsync();
         }
 
-        public async Task AddAsync(Pakket Pakket)
+        public async Task<Pakket> AddAsync(Pakket Pakket)
         {
             _context.Pakketten.Add(Pakket);
             await _context.SaveChangesAsync();
+            return Pakket;
         }
 
-        public async Task UpdateAsync(Pakket Pakket)
+        public async Task<Pakket> UpdateAsync(Pakket Pakket)
         {
+            var pakketOld = await _context.Pakketten
+                .Include(p => p.Producten)
+                .FirstOrDefaultAsync(x => x.Id == Pakket.Id);
+            if(pakketOld == null)
+            {
+                throw new Exception("Pakket not found");
+            }
+            if(pakketOld.ReservedBy != null)
+            {
+                throw new Exception("Pakket is already reserved");
+            }
             _context.Entry(Pakket).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+
+            return Pakket;
         }
 
         public async Task DeleteAsync(int id)
         {
-            var Pakket = await _context.Pakketten.FindAsync(id);
-            if (Pakket != null)
+            var Pakket = await _context.Pakketten
+                .Include(p => p.Producten)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (Pakket == null)
             {
-                _context.Pakketten.Remove(Pakket);
-                await _context.SaveChangesAsync();
+                throw new Exception("Pakket not found");
             }
+            if (Pakket.ReservedBy != null)
+            {
+                throw new Exception("Pakket is already reserved");
+            }
+            _context.Pakketten.Remove(Pakket);
+            await _context.SaveChangesAsync();
+            
         }
     }
 }

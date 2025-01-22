@@ -13,13 +13,19 @@ namespace Voedselverspilling.Domain.Models
         [Key]
         public int Id { get; set; }
         public required string Naam { get; set; }
-        public List<int> ProductenId { get; set; } = new List<int>();
         public required string Stad {  get; set; }
         public required int KantineId { get; set; }
         public Boolean Is18 {  get; set; }
         public Boolean IsWarm {  get; set; }
         public double Prijs { get; set; }
         public string? Type { get; set; }
+
+        public ICollection<Product> Producten { get; set; } = null!;
+
+        public Student? ReservedBy { get; set; }
+        public DateTime ReservaringDatum { get; set; }
+        public Boolean IsOpgehaald { get; set; }
+        public DateTime TijdOpgehaald { get; set; }
     }
 
     enum maaltijdType

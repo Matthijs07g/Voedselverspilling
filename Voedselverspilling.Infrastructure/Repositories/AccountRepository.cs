@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Voedselverspilling.Domain.IRepositories;
 using Voedselverspilling.Domain.Models;
+using Voedselverspilling.DomainServices.IRepositories;
 
 namespace Voedselverspilling.Infrastructure.Repositories
 {

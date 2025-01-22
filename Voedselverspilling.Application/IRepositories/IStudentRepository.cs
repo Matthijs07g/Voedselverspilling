@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Voedselverspilling.Domain.Models;
 
-namespace Voedselverspilling.Domain.Interfaces
+namespace Voedselverspilling.DomainServices.Interfaces
 {
     public interface IStudentRepository
     {

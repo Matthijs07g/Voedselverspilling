@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Voedselverspilling.Domain.IRepositories;
+using Voedselverspilling.DomainServices.IRepositories;
 using Voedselverspilling.Domain.Models;
 
 namespace Voedselverspilling.Infrastructure.Repositories
@@ -20,34 +20,45 @@ namespace Voedselverspilling.Infrastructure.Repositories
 
         public async Task<Kantine> GetByIdAsync(int id)
         {
-            return await _context.Kantines.FindAsync(id);
+            var canteen = await _context.Kantines.FindAsync(id);
+            return canteen ?? throw new Exception("Kantine not found");
         }
 
         public async Task<IEnumerable<Kantine>> GetAllAsync()
         {
-            return await _context.Kantines.ToListAsync();
+            var canteens = await _context.Kantines.ToListAsync();
+            return canteens ?? throw new Exception("No kantines found");
         }
 
-        public async Task AddAsync(Kantine Kantine)
+        public async Task<Kantine> AddAsync(Kantine Kantine)
         {
             _context.Kantines.Add(Kantine);
             await _context.SaveChangesAsync();
+            return Kantine;
         }
 
-        public async Task UpdateAsync(Kantine Kantine)
+        public async Task<Kantine> UpdateAsync(Kantine Kantine)
         {
+            var canteenOld = await _context.Kantines.FindAsync(Kantine.Id);
+            if (canteenOld == null)
+            {
+                throw new Exception("Kantine not found");
+            }
+
             _context.Entry(Kantine).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+            return Kantine;
         }
 
         public async Task DeleteAsync(int id)
         {
             var Kantine = await _context.Kantines.FindAsync(id);
-            if (Kantine != null)
+            if (Kantine == null)
             {
-                _context.Kantines.Remove(Kantine);
-                await _context.SaveChangesAsync();
+                throw new Exception("Kantine not found");
             }
+            _context.Kantines.Remove(Kantine);
+            await _context.SaveChangesAsync();
         }
     }
 }
