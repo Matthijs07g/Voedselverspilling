@@ -1,4 +1,4 @@
-﻿@model Voedselverspilling.Web.Models.MealboxDetailModel
+﻿@model Voedselverspilling.Domain.Models.Pakket
 
 @{
     ViewData["Title"] = "Mealbox Details";
@@ -8,20 +8,20 @@
 
 <div class="card">
     <div class="card-header">
-        <h2>@Model.MealboxModel.Naam</h2>
+        <h2>@Model.Naam</h2>
     </div>
     <div class="card-body">
-        <p><strong>Stad:</strong> @Model.MealboxModel.Stad</p>
-        <p><strong>Prijs:</strong> @(Model.MealboxModel.Prijs.ToString("C"))</p>
-        <p><strong>Type:</strong> @(Model.MealboxModel.Type ?? "N/A")</p>
-        <p><strong>Alcohol:</strong> @(Model.MealboxModel.Is18 ? "Ja" : "Nee")</p>
-        <p><strong>Warme maaltijd:</strong> @(Model.MealboxModel.IsWarm ? "Ja" : "Nee")</p>
+        <p><strong>Stad:</strong> @Model.Stad</p>
+        <p><strong>Prijs:</strong> @(Model.Prijs.ToString("C"))</p>
+        <p><strong>Type:</strong> @(Model.Type ?? "N/A")</p>
+        <p><strong>Alcohol:</strong> @(Model.Is18 ? "Ja" : "Nee")</p>
+        <p><strong>Warme maaltijd:</strong> @(Model.IsWarm ? "Ja" : "Nee")</p>
 
-        @if (Model.Products != null && Model.Products.Count > 0)
+        @if (Model.Producten != null && Model.Producten.Count > 0)
         {
             <h4>Producten</h4>
             <ul>
-                @foreach (var product in Model.Products)
+                @foreach (var product in Model.Producten)
                 {
                     <li>Naam: @product.Naam</li> <!-- Replace this with real product names or details if available -->
                     <li>Alcohol: @(product.IsAlcohol ? "Ja" : "Nee")</li>
@@ -36,12 +36,12 @@
     </div>
     <div class="card-footer">
         @if(User.IsInRole("Admin") || User.IsInRole("Worker")){
-            <a asp-action="MealboxEdit" asp-route-id="@Model.MealboxModel.Id" class="btn btn-primary">Bewerken</a>
-            <a asp-action="MealboxDelete" asp-route-id="@Model.MealboxModel.Id" class="btn btn-danger">Verwijderen</a>
+            <a asp-action="MealboxEdit" asp-route-id="@Model.Id" class="btn btn-primary">Bewerken</a>
+            <a asp-action="MealboxDelete" asp-route-id="@Model.Id" class="btn btn-danger">Verwijderen</a>
         }
-        @if (User.IsInRole("Student") && Model.MealboxModel.ReservedBy == null)
+        @if (User.IsInRole("Student") && Model.ReservedBy == null)
         {
-            <a asp-action="MealboxReserveer" asp-route-id="@Model.MealboxModel.Id" class="btn btn-success">Reserveren</a>
+            <a asp-action="MealboxReserveer" asp-route-id="@Model.Id" class="btn btn-success">Reserveren</a>
         }
         <a asp-action="Mealboxes" class="btn btn-secondary">Terug naar lijst</a>
     </div>
