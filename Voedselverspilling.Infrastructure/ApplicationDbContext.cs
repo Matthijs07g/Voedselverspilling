@@ -22,12 +22,6 @@ namespace Voedselverspilling.Infrastructure
         public DbSet<KantineWorker> Medewerker { get; set; }
 
 
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-
-        //    optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=Voedselverspilling;Trust Server Certificate=True;Integrated Security=True; Encrypt=False");
-        //}
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -130,8 +124,7 @@ namespace Voedselverspilling.Infrastructure
                 Prijs = 6.99,
                 Type = "Brood",
                 ReservedBy = student1,
-                ReservaringDatum = new DateTime(2025, 1, 15),
-                IsOpgehaald = false,
+                ReserveringDatum = new DateTime(2025, 1, 15),
                 EindDatum = new DateTime(2025, 1, 22)
             };
 

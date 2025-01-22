@@ -23,8 +23,8 @@ namespace Voedselverspilling.Domain.Models
         public ICollection<Product> Producten { get; set; } = null!;
 
         public Student? ReservedBy { get; set; }
-        public DateTime? ReservaringDatum { get; set; }
-        public Boolean IsOpgehaald { get; set; }
+        public DateTime? ReserveringDatum { get; set; }
+        public Boolean IsOpgehaald { get; set; } = false;
         public DateTime EindDatum { get; set; }
     }
 
