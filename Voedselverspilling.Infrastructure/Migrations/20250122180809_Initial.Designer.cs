@@ -12,7 +12,7 @@ using Voedselverspilling.Infrastructure;
 namespace Voedselverspilling.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240917132836_Initial")]
+    [Migration("20250122180809_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -27,17 +27,29 @@ namespace Voedselverspilling.Infrastructure.Migrations
 
             modelBuilder.Entity("PakketProduct", b =>
                 {
-                    b.Property<int>("PakketenId")
+                    b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductenId")
+                    b.Property<int>("PakketId")
                         .HasColumnType("int");
 
-                    b.HasKey("PakketenId", "ProductenId");
+                    b.HasKey("ProductId", "PakketId");
 
-                    b.HasIndex("ProductenId");
+                    b.HasIndex("PakketId");
 
                     b.ToTable("PakketProduct");
+
+                    b.HasData(
+                        new
+                        {
+                            ProductId = 1,
+                            PakketId = 1
+                        },
+                        new
+                        {
+                            ProductId = 2,
+                            PakketId = 2
+                        });
                 });
 
             modelBuilder.Entity("Voedselverspilling.Domain.Models.Kantine", b =>
@@ -52,14 +64,32 @@ namespace Voedselverspilling.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Locatie")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Stad")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Kantines");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            IsWarm = true,
+                            Locatie = "LA",
+                            Stad = "Breda"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            IsWarm = false,
+                            Locatie = "LC",
+                            Stad = "Breda"
+                        });
                 });
 
             modelBuilder.Entity("Voedselverspilling.Domain.Models.KantineWorker", b =>
@@ -70,9 +100,12 @@ namespace Voedselverspilling.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Locatie")
+                    b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("KantineId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Naam")
                         .IsRequired()
@@ -88,6 +121,26 @@ namespace Voedselverspilling.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Medewerker");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Email = "i.jansen@avans.nl",
+                            KantineId = 1,
+                            Naam = "Ingrid Jansen",
+                            PersoneelsNummer = 1,
+                            Stad = "Breda"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Email = "h.basten@avans.nl",
+                            KantineId = 2,
+                            Naam = "Henk van Basten",
+                            PersoneelsNummer = 2,
+                            Stad = "Breda"
+                        });
                 });
 
             modelBuilder.Entity("Voedselverspilling.Domain.Models.Pakket", b =>
@@ -98,7 +151,16 @@ namespace Voedselverspilling.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("EindDatum")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("Is18")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsOpgehaald")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsWarm")
                         .HasColumnType("bit");
 
                     b.Property<int>("KantineId")
@@ -111,18 +173,55 @@ namespace Voedselverspilling.Infrastructure.Migrations
                     b.Property<double>("Prijs")
                         .HasColumnType("float");
 
+                    b.Property<int?>("ReservedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ReserveringDatum")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Stad")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("KantineId");
+                    b.HasIndex("ReservedById");
 
                     b.ToTable("Pakketten");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            EindDatum = new DateTime(2025, 1, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Is18 = false,
+                            IsOpgehaald = false,
+                            IsWarm = true,
+                            KantineId = 1,
+                            Naam = "Zee eten",
+                            Prijs = 10.99,
+                            Stad = "Breda",
+                            Type = "Warm"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            EindDatum = new DateTime(2025, 1, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Is18 = false,
+                            IsOpgehaald = false,
+                            IsWarm = true,
+                            KantineId = 2,
+                            Naam = "Broodje kroket",
+                            Prijs = 6.9900000000000002,
+                            ReservedById = 1,
+                            ReserveringDatum = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Stad = "Breda",
+                            Type = "Brood"
+                        });
                 });
 
             modelBuilder.Entity("Voedselverspilling.Domain.Models.Product", b =>
@@ -146,38 +245,22 @@ namespace Voedselverspilling.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Producten");
-                });
 
-            modelBuilder.Entity("Voedselverspilling.Domain.Models.Reservering", b =>
-                {
-                    b.Property<int>("ReserveringId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReserveringId"));
-
-                    b.Property<bool>("IsOpgehaald")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("PakketId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("ReservaringDatum")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("TijdOpgehaald")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("ReserveringId");
-
-                    b.HasIndex("PakketId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("Reserveringen");
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Foto = "https://www.broodje.nl/wp-content/uploads/2022/03/lunch-broodje-zalm-luxe.jpg",
+                            IsAlcohol = false,
+                            Naam = "Broodje zalm"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Foto = "https://www.praktijkmik.nl/media/tz_portfolio_plus/article/cache/een-broodje-kroket-28_o.jpg",
+                            IsAlcohol = false,
+                            Naam = "Broodje kroket"
+                        });
                 });
 
             modelBuilder.Entity("Voedselverspilling.Domain.Models.Student", b =>
@@ -211,51 +294,52 @@ namespace Voedselverspilling.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Studenten");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Emailaddress = "mmj.vangastel@student.avans.nl",
+                            GeboorteDatum = new DateOnly(2002, 11, 7),
+                            Naam = "Matthijs van Gastel",
+                            Stad = "Breda",
+                            StudentNummer = 2186230,
+                            TelefoonNr = 0
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Emailaddress = "t.jansen@student.avans.nl",
+                            GeboorteDatum = new DateOnly(2010, 5, 15),
+                            Naam = "Theo Jansen",
+                            Stad = "Breda",
+                            StudentNummer = 2286230,
+                            TelefoonNr = 0
+                        });
                 });
 
             modelBuilder.Entity("PakketProduct", b =>
                 {
                     b.HasOne("Voedselverspilling.Domain.Models.Pakket", null)
                         .WithMany()
-                        .HasForeignKey("PakketenId")
+                        .HasForeignKey("PakketId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Voedselverspilling.Domain.Models.Product", null)
                         .WithMany()
-                        .HasForeignKey("ProductenId")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
             modelBuilder.Entity("Voedselverspilling.Domain.Models.Pakket", b =>
                 {
-                    b.HasOne("Voedselverspilling.Domain.Models.Kantine", "Kantine")
+                    b.HasOne("Voedselverspilling.Domain.Models.Student", "ReservedBy")
                         .WithMany()
-                        .HasForeignKey("KantineId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ReservedById");
 
-                    b.Navigation("Kantine");
-                });
-
-            modelBuilder.Entity("Voedselverspilling.Domain.Models.Reservering", b =>
-                {
-                    b.HasOne("Voedselverspilling.Domain.Models.Pakket", "Pakket")
-                        .WithMany()
-                        .HasForeignKey("PakketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Voedselverspilling.Domain.Models.Student", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Pakket");
-
-                    b.Navigation("Student");
+                    b.Navigation("ReservedBy");
                 });
 #pragma warning restore 612, 618
         }

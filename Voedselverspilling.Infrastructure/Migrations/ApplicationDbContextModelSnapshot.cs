@@ -46,16 +46,6 @@ namespace Voedselverspilling.Infrastructure.Migrations
                         {
                             ProductId = 2,
                             PakketId = 2
-                        },
-                        new
-                        {
-                            ProductId = 1,
-                            PakketId = 2
-                        },
-                        new
-                        {
-                            ProductId = 2,
-                            PakketId = 1
                         });
                 });
 
@@ -191,6 +181,7 @@ namespace Voedselverspilling.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Type")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -198,6 +189,36 @@ namespace Voedselverspilling.Infrastructure.Migrations
                     b.HasIndex("ReservedById");
 
                     b.ToTable("Pakketten");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            EindDatum = new DateTime(2025, 1, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Is18 = false,
+                            IsOpgehaald = false,
+                            IsWarm = true,
+                            KantineId = 1,
+                            Naam = "Zee eten",
+                            Prijs = 10.99,
+                            Stad = "Breda",
+                            Type = "Warm"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            EindDatum = new DateTime(2025, 1, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Is18 = false,
+                            IsOpgehaald = false,
+                            IsWarm = true,
+                            KantineId = 2,
+                            Naam = "Broodje kroket",
+                            Prijs = 6.9900000000000002,
+                            ReservedById = 1,
+                            ReserveringDatum = new DateTime(2025, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Stad = "Breda",
+                            Type = "Brood"
+                        });
                 });
 
             modelBuilder.Entity("Voedselverspilling.Domain.Models.Product", b =>
