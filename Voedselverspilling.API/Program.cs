@@ -30,7 +30,6 @@ builder.Services.AddScoped<IKantineWorkerRepository, KantineWorkerRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IPakketRepository, PakketRepository>();
-builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 
 
 

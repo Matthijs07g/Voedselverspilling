@@ -17,5 +17,6 @@ namespace Voedselverspilling.DomainServices.IRepositories
         Task<IEnumerable<Pakket>> GetByEmailAsync(string Email);
 
         Task<Pakket> ReservePakketAsync(int id, Student student);
+        Task<IEnumerable<Pakket>> GetByKantine(int id);
     }
 }

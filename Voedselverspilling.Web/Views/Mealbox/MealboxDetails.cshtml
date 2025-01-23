@@ -23,9 +23,9 @@
             <ul>
                 @foreach (var product in Model.Producten)
                 {
-                    <li>Naam: @product.Naam</li> <!-- Replace this with real product names or details if available -->
+                    <li>Naam: @product.Naam</li> 
                     <li>Alcohol: @(product.IsAlcohol ? "Ja" : "Nee")</li>
-                    <li>Foto: <img src="@product.Foto" width="200" /></li>
+                    <li>Foto: <img src="@product.Foto" width="200" /></li><br />
                 }
             </ul>
         }

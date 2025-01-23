@@ -4,8 +4,8 @@ namespace Voedselverspilling.Web.Models
 {
     public class MealboxEditModel
     {
-        public Pakket Mealbox { get; set; }
-        public IEnumerable<Product> AvailableProducts { get; set; }
-        public ICollection<int> SelectedProductIds { get; set; }
+        public Pakket Mealbox { get; set; } = null!;
+        public IEnumerable<Product> AvailableProducts { get; set; } = new List<Product>();
+        public ICollection<int> SelectedProductIds { get; set; } = new List<int>();
     }
 }

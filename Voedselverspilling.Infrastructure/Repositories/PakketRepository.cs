@@ -133,5 +133,13 @@ namespace Voedselverspilling.Infrastructure.Repositories
             await _context.SaveChangesAsync();
             return pakket;
         }
+
+        public async Task<IEnumerable<Pakket>> GetByKantine(int id)
+        {
+            return await _context.Pakketten
+                .Include(p => p.Producten)
+                .Where(x => x.KantineId == id)
+                .ToListAsync();
+        }
     }
 }

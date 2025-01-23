@@ -59,6 +59,12 @@ namespace Voedselverspilling.Web.Controllers
 
             var mealboxes = await _pakketRepository.GetByEmailAsync(userIdentity.Email);
             var sortedMealboxes = mealboxes.OrderBy(m => m.EindDatum).ToList();
+
+            if (User.IsInRole("Worker")){
+                var worker = await _kantineWorkerRepository.GetByEmailAsync(userIdentity.Email);
+                mealboxes = await _pakketRepository.GetByKantine(worker.KantineId);
+                sortedMealboxes = mealboxes.OrderBy(m => m.EindDatum).ToList();
+            }
             return View(sortedMealboxes);
         }
 
@@ -81,18 +87,6 @@ namespace Voedselverspilling.Web.Controllers
         public async Task<IActionResult> MealboxAdd(MealboxCreateModel mealboxCreateModel)
         {
             mealboxCreateModel.AvailableProducts = await _productRepository.GetAllAsync();
-
-            if(!ModelState.IsValid)
-            {
-                var errors = ModelState.Values.SelectMany(v => v.Errors);
-                foreach (var error in errors)
-                {
-                    Console.WriteLine(error.ErrorMessage);
-                }
-
-                return View(mealboxCreateModel);
-            }
-
             var userIdentity = await _userManager.GetUserAsync(User);
             if (userIdentity == null)
             {
@@ -101,6 +95,19 @@ namespace Voedselverspilling.Web.Controllers
 
             var kantineWorker = await _kantineWorkerRepository.GetByEmailAsync(userIdentity.Email);
             var kantine = await _kantineRepository.GetByIdAsync(kantineWorker.KantineId);
+            mealboxCreateModel.Mealbox.KantineId = kantine.Id;
+            mealboxCreateModel.Mealbox.Stad = kantine.Stad;
+
+            //if(!ModelState.IsValid)
+            //{
+            //    var errors = ModelState.Values.SelectMany(v => v.Errors);
+            //    foreach (var error in errors)
+            //    {
+            //        Console.WriteLine(error.ErrorMessage);
+            //    }
+
+            //    return View(mealboxCreateModel);
+            //}
 
             var selectedProducts = new List<Product>();
             foreach(var item in mealboxCreateModel.SelectedProductIds)
@@ -117,9 +124,9 @@ namespace Voedselverspilling.Web.Controllers
             var newMealbox = new Pakket
             {
                 Naam = mealboxCreateModel.Mealbox.Naam,
-                Stad = kantine.Stad,
+                Stad = mealboxCreateModel.Mealbox.Stad,
                 Prijs = mealboxCreateModel.Mealbox.Prijs,
-                KantineId = kantine.Id,
+                KantineId = mealboxCreateModel.Mealbox.KantineId,
                 Type = mealboxCreateModel.Mealbox.Type,
                 Is18 = mealboxCreateModel.Mealbox.Is18,
                 IsWarm = mealboxCreateModel.Mealbox.IsWarm,
@@ -155,11 +162,18 @@ namespace Voedselverspilling.Web.Controllers
         public async Task<IActionResult> MealboxEdit(int id)
         {
             var mealbox = await _pakketRepository.GetByIdAsync(id);
+            if (mealbox == null)
+            {
+                return NotFound();
+            }
+
             var model = new MealboxEditModel
             {
                 Mealbox = mealbox,
-                AvailableProducts = await _productRepository.GetAllAsync()
+                AvailableProducts = await _productRepository.GetAllAsync(), // Initialize available products
+                SelectedProductIds = mealbox.Producten?.Select(p => p.Id).ToList() ?? new List<int>() // Initialize selected products
             };
+
             return View(model);
         }
 
