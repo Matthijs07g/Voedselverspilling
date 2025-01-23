@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Moq;
-using Voedselverspilling.Domain.IRepositories;
 using Voedselverspilling.Domain.Models;
 using Voedselverspilling.Infrastructure.Repositories;
 using Xunit;
@@ -16,7 +15,7 @@ namespace Voedselverspilling.Domain.Test.Tests
     {
         private readonly Mock<UserManager<AppIdentity>> _userManagerMock;
         private readonly Mock<SignInManager<AppIdentity>> _signInManagerMock;
-        private readonly IAccountRepository _accountRepository;
+        private readonly AccountRepository _accountRepository;
 
         public AccountRepositoryTests()
         {

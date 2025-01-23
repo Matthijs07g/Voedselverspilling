@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Voedselverspilling.Domain.Interfaces;
-using Voedselverspilling.Domain.IRepositories;
 using Voedselverspilling.Domain.Models;
 using Voedselverspilling.Infrastructure;
 using Voedselverspilling.Infrastructure.Repositories;
@@ -15,7 +13,7 @@ namespace Voedselverspilling.Domain.Test.Tests
     public class StudentRepositoryTests : IDisposable
     {
         private readonly ApplicationDbContext _context;
-        private readonly IStudentRepository _repository;
+        private readonly StudentRepository _repository;
 
         public StudentRepositoryTests()
         {

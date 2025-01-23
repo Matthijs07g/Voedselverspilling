@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voedselverspilling.Web", "V
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voedselverspilling.API", "Voedselverspilling.API\Voedselverspilling.API.csproj", "{7A3A451D-1C6B-4C01-BE4F-0BC30F23BFB0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voedselverspilling.Domain.Test", "Voedselverspilling.Domain.Test\Voedselverspilling.Domain.Test.csproj", "{D3D3DCC3-E253-415F-B70C-2035A4D4D34A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voedselverspilling.Infrastructure.Test", "Voedselverspilling.Domain.Test\Voedselverspilling.Infrastructure.Test.csproj", "{D3D3DCC3-E253-415F-B70C-2035A4D4D34A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using Voedselverspilling.Domain.IRepositories;
 using Voedselverspilling.Domain.Models;
 using Voedselverspilling.Infrastructure;
 using Voedselverspilling.Infrastructure.Repositories;
@@ -15,7 +14,7 @@ namespace Voedselverspilling.Domain.Test.Tests
     public class KantineRepositoryTests : IDisposable
     {
         private readonly ApplicationDbContext _context;
-        private readonly IKantineRepository _repository;
+        private readonly KantineRepository _repository;
 
         public KantineRepositoryTests()
         {
