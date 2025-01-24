@@ -8,7 +8,7 @@ using Voedselverspilling.Infrastructure;
 using Voedselverspilling.Infrastructure.Repositories;
 using Xunit;
 
-namespace Voedselverspilling.Domain.Test.Tests
+namespace Voedselverspilling.Infrastructure.Test.Tests
 {
     public class StudentRepositoryTests : IDisposable
     {
@@ -18,7 +18,7 @@ namespace Voedselverspilling.Domain.Test.Tests
         public StudentRepositoryTests()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) // Unique in-memory database per test
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
             _context = new ApplicationDbContext(options);
@@ -27,7 +27,7 @@ namespace Voedselverspilling.Domain.Test.Tests
 
         public void Dispose()
         {
-            _context.Database.EnsureDeleted(); // Cleanup the in-memory database
+            _context.Database.EnsureDeleted();
             _context.Dispose();
         }
 
@@ -37,18 +37,18 @@ namespace Voedselverspilling.Domain.Test.Tests
             // Arrange
             var student = new Student
             {
-                Id = 1,
                 Naam = "John Doe",
                 GeboorteDatum = new DateOnly(2000, 1, 1),
                 StudentNummer = 12345,
-                Emailaddress = "john.doe@example.com",
+                Emailaddress = "johndoe@example.com",
                 Stad = "Amsterdam",
                 TelefoonNr = 123456789
             };
-            await _repository.AddAsync(student);
+            _context.Studenten.Add(student);
+            await _context.SaveChangesAsync();
 
             // Act
-            var result = await _repository.GetByIdAsync(1);
+            var result = await _repository.GetByIdAsync(student.Id);
 
             // Assert
             Assert.NotNull(result);
@@ -56,13 +56,11 @@ namespace Voedselverspilling.Domain.Test.Tests
         }
 
         [Fact]
-        public async Task GetByIdAsync_ReturnsNull_WhenDoesNotExist()
+        public async Task GetByIdAsync_ThrowsException_WhenNotFound()
         {
-            // Act
-            var result = await _repository.GetByIdAsync(999);
-
-            // Assert
-            Assert.Null(result);
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() => _repository.GetByIdAsync(999));
+            Assert.Equal("Student with id 999 not found", exception.Message);
         }
 
         [Fact]
@@ -71,14 +69,11 @@ namespace Voedselverspilling.Domain.Test.Tests
             // Arrange
             var students = new List<Student>
             {
-                new Student { Id = 1, Naam = "John Doe", GeboorteDatum = new DateOnly(2000, 1, 1), StudentNummer = 12345, Emailaddress = "john.doe@example.com", Stad = "Amsterdam", TelefoonNr = 123456789 },
-                new Student { Id = 2, Naam = "Jane Doe", GeboorteDatum = new DateOnly(1999, 5, 5), StudentNummer = 12346, Emailaddress = "jane.doe@example.com", Stad = "Rotterdam", TelefoonNr = 987654321 }
+                new Student { Naam = "Student 1", GeboorteDatum = new DateOnly(2000, 1, 1), StudentNummer = 111, Emailaddress = "student1@example.com", Stad = "Rotterdam", TelefoonNr = 12345 },
+                new Student { Naam = "Student 2", GeboorteDatum = new DateOnly(2001, 2, 2), StudentNummer = 222, Emailaddress = "student2@example.com", Stad = "Den Haag", TelefoonNr = 67890 }
             };
-
-            foreach (var student in students)
-            {
-                await _repository.AddAsync(student);
-            }
+            _context.Studenten.AddRange(students);
+            await _context.SaveChangesAsync();
 
             // Act
             var result = await _repository.GetAllAsync();
@@ -93,83 +88,130 @@ namespace Voedselverspilling.Domain.Test.Tests
             // Arrange
             var student = new Student
             {
-                Id = 1,
-                Naam = "John Doe",
-                GeboorteDatum = new DateOnly(2000, 1, 1),
-                StudentNummer = 12345,
-                Emailaddress = "john.doe@example.com",
-                Stad = "Amsterdam",
-                TelefoonNr = 123456789
+                Naam = "Jane Doe",
+                GeboorteDatum = new DateOnly(1998, 5, 5),
+                StudentNummer = 54321,
+                Emailaddress = "janedoe@example.com",
+                Stad = "Utrecht",
+                TelefoonNr = 987654321
             };
 
             // Act
-            await _repository.AddAsync(student);
-            var result = await _repository.GetByIdAsync(1);
+            var result = await _repository.AddAsync(student);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(student.Naam, result.Naam);
+            Assert.Equal(student.Emailaddress, result.Emailaddress);
         }
 
         [Fact]
-        public async Task UpdateAsync_UpdatesStudent()
+        public async Task UpdateAsync_UpdatesExistingStudent()
         {
             // Arrange
             var student = new Student
             {
-                Id = 1,
-                Naam = "John Doe",
-                GeboorteDatum = new DateOnly(2000, 1, 1),
-                StudentNummer = 12345,
-                Emailaddress = "john.doe@example.com",
-                Stad = "Amsterdam",
-                TelefoonNr = 123456789
+                Naam = "Tom Smith",
+                GeboorteDatum = new DateOnly(1995, 4, 4),
+                StudentNummer = 12321,
+                Emailaddress = "tomsmith@example.com",
+                Stad = "Leiden",
+                TelefoonNr = 112233445
             };
-            await _repository.AddAsync(student);
+            _context.Studenten.Add(student);
+            await _context.SaveChangesAsync();
+
+            student.Naam = "Thomas Smith";
 
             // Act
-            student.Naam = "John Updated";
-            await _repository.UpdateAsync(student);
-            var updatedStudent = await _repository.GetByIdAsync(1);
+            var result = await _repository.UpdateAsync(student);
 
             // Assert
-            Assert.Equal("John Updated", updatedStudent.Naam);
+            Assert.NotNull(result);
+            Assert.Equal("Thomas Smith", result.Naam);
         }
 
         [Fact]
-        public async Task DeleteAsync_RemovesStudent_WhenExists()
+        public async Task UpdateAsync_ThrowsException_WhenStudentNotFound()
         {
             // Arrange
             var student = new Student
             {
-                Id = 1,
-                Naam = "John Doe",
+                Id = 999,
+                Naam = "Nonexistent Student",
                 GeboorteDatum = new DateOnly(2000, 1, 1),
-                StudentNummer = 12345,
-                Emailaddress = "john.doe@example.com",
-                Stad = "Amsterdam",
-                TelefoonNr = 123456789
+                StudentNummer = 99999,
+                Emailaddress = "nonexistent@example.com",
+                Stad = "Nowhere",
+                TelefoonNr = 0
             };
-            await _repository.AddAsync(student);
 
-            // Act
-            await _repository.DeleteAsync(1);
-            var result = await _repository.GetByIdAsync(1);
-
-            // Assert
-            Assert.Null(result);
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<Exception>(() => _repository.UpdateAsync(student));
+            Assert.Equal("Student not found", exception.Message);
         }
 
         [Fact]
-        public async Task DeleteAsync_DoesNothing_WhenDoesNotExist()
+        public async Task DeleteAsync_DeletesExistingStudent()
         {
+            // Arrange
+            var student = new Student
+            {
+                Naam = "Anna Johnson",
+                GeboorteDatum = new DateOnly(1997, 3, 3),
+                StudentNummer = 55555,
+                Emailaddress = "annajohnson@example.com",
+                Stad = "Haarlem",
+                TelefoonNr = 987654321
+            };
+            _context.Studenten.Add(student);
+            await _context.SaveChangesAsync();
+
             // Act
-            await _repository.DeleteAsync(999);
+            await _repository.DeleteAsync(student.Id);
 
             // Assert
-            var allStudents = await _repository.GetAllAsync();
-            Assert.Empty(allStudents);
+            var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() => _repository.GetByIdAsync(student.Id));
+            Assert.Equal($"Student with id {student.Id} not found", exception.Message);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_ThrowsException_WhenStudentNotFound()
+        {
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<Exception>(() => _repository.DeleteAsync(999));
+            Assert.Equal("Student not found", exception.Message);
+        }
+
+        [Fact]
+        public async Task GetByEmailAsync_ReturnsStudent_WhenExists()
+        {
+            // Arrange
+            var student = new Student
+            {
+                Naam = "David Lee",
+                GeboorteDatum = new DateOnly(1999, 6, 6),
+                StudentNummer = 66666,
+                Emailaddress = "davidlee@example.com",
+                Stad = "Eindhoven",
+                TelefoonNr = 123987456
+            };
+            _context.Studenten.Add(student);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _repository.GetByEmailAsync(student.Emailaddress);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(student.Emailaddress, result.Emailaddress);
+        }
+
+        [Fact]
+        public async Task GetByEmailAsync_ThrowsException_WhenNotFound()
+        {
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() => _repository.GetByEmailAsync("unknown@example.com"));
+            Assert.Equal("Student with email unknown@example.com not found", exception.Message);
         }
     }
 }
-

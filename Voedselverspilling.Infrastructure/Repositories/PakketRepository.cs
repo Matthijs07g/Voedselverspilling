@@ -96,6 +96,11 @@ namespace Voedselverspilling.Infrastructure.Repositories
                 .Include(p => p.Producten)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
+            if (pakket == null)
+            {
+                throw new Exception("Pakket not found");
+            }
+
             if (pakket.Is18)
             {
                 var today = DateOnly.FromDateTime(DateTime.Today);
@@ -115,10 +120,7 @@ namespace Voedselverspilling.Infrastructure.Repositories
                 }
             }
 
-            if (pakket == null)
-            {
-                throw new Exception("Pakket not found");
-            }
+            
 
             var dateAvailability = await _context.Pakketten.Where(x => x.ReservedBy.Id == student.Id && x.ReserveringDatum == pakket.EindDatum)
                 .ToListAsync();

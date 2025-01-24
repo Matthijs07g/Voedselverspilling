@@ -44,11 +44,4 @@ namespace Voedselverspilling.Domain.Models
         [Required]
         public DateTime EindDatum { get; set; }
     }
-
-    enum maaltijdType
-    {
-        Brood,
-        Warme_avondmaaltijd,
-        Drank
-    }
 }

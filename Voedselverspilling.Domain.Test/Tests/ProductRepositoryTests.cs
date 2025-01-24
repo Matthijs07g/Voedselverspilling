@@ -4,11 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Voedselverspilling.Domain.Models;
-using Voedselverspilling.Infrastructure;
 using Voedselverspilling.Infrastructure.Repositories;
 using Xunit;
 
-namespace Voedselverspilling.Domain.Test.Tests
+namespace Voedselverspilling.Infrastructure.Test.Tests
 {
     public class ProductRepositoryTests : IDisposable
     {
@@ -18,7 +17,7 @@ namespace Voedselverspilling.Domain.Test.Tests
         public ProductRepositoryTests()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) // Unique in-memory database per test
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
 
             _context = new ApplicationDbContext(options);
@@ -27,7 +26,8 @@ namespace Voedselverspilling.Domain.Test.Tests
 
         public void Dispose()
         {
-            _context.Database.EnsureDeleted(); // Cleanup the in-memory database
+            _context.ChangeTracker.Clear();
+            _context.Database.EnsureDeleted();
             _context.Dispose();
         }
 
@@ -35,11 +35,18 @@ namespace Voedselverspilling.Domain.Test.Tests
         public async Task GetByIdAsync_ReturnsProduct_WhenExists()
         {
             // Arrange
-            var product = new Product { Id = 1, Naam = "Bier", IsAlcohol = true };
-            await _repository.AddAsync(product);
+            var product = new Product
+            {
+                Id = 1,
+                Naam = "Test Product",
+                IsAlcohol = false,
+                Foto = "testphoto.jpg"
+            };
+            _context.Producten.Add(product);
+            await _context.SaveChangesAsync();
 
             // Act
-            var result = await _repository.GetByIdAsync(1);
+            var result = await _repository.GetByIdAsync(product.Id);
 
             // Assert
             Assert.NotNull(result);
@@ -47,13 +54,11 @@ namespace Voedselverspilling.Domain.Test.Tests
         }
 
         [Fact]
-        public async Task GetByIdAsync_ReturnsNull_WhenDoesNotExist()
+        public async Task GetByIdAsync_ThrowsException_WhenNotFound()
         {
-            // Act
-            var result = await _repository.GetByIdAsync(999);
-
-            // Assert
-            Assert.Null(result);
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<Exception>(() => _repository.GetByIdAsync(999));
+            Assert.Equal("Product not found", exception.Message);
         }
 
         [Fact]
@@ -62,14 +67,11 @@ namespace Voedselverspilling.Domain.Test.Tests
             // Arrange
             var products = new List<Product>
             {
-                new Product { Id = 1, Naam = "Bier", IsAlcohol = true },
-                new Product { Id = 2, Naam = "Water", IsAlcohol = false }
+                new Product { Id = 1, Naam = "Product 1", IsAlcohol = false },
+                new Product { Id = 2, Naam = "Product 2", IsAlcohol = true }
             };
-
-            foreach (var product in products)
-            {
-                await _repository.AddAsync(product);
-            }
+            _context.Producten.AddRange(products);
+            await _context.SaveChangesAsync();
 
             // Act
             var result = await _repository.GetAllAsync();
@@ -79,14 +81,27 @@ namespace Voedselverspilling.Domain.Test.Tests
         }
 
         [Fact]
+        public async Task GetAllAsync_ThrowsException_WhenNoProductsExist()
+        {
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<Exception>(() => _repository.GetAllAsync());
+            Assert.Equal("No products found", exception.Message);
+        }
+
+        [Fact]
         public async Task AddAsync_AddsProduct()
         {
             // Arrange
-            var product = new Product { Id = 1, Naam = "Bier", IsAlcohol = true };
+            var product = new Product
+            {
+                Id = 1,
+                Naam = "New Product",
+                IsAlcohol = false,
+                Foto = "newphoto.jpg"
+            };
 
             // Act
-            await _repository.AddAsync(product);
-            var result = await _repository.GetByIdAsync(1);
+            var result = await _repository.AddAsync(product);
 
             // Assert
             Assert.NotNull(result);
@@ -94,45 +109,74 @@ namespace Voedselverspilling.Domain.Test.Tests
         }
 
         [Fact]
-        public async Task UpdateAsync_UpdatesProduct()
+        public async Task UpdateAsync_UpdatesExistingProduct()
         {
             // Arrange
-            var product = new Product { Id = 1, Naam = "Bier", IsAlcohol = true };
-            await _repository.AddAsync(product);
+            var product = new Product
+            {
+                Id = 1,
+                Naam = "Original Product",
+                IsAlcohol = false,
+                Foto = "originalphoto.jpg"
+            };
+            _context.Producten.Add(product);
+            await _context.SaveChangesAsync();
+
+            product.Naam = "Updated Product";
 
             // Act
-            product.Naam = "Wijn";
-            await _repository.UpdateAsync(product);
-            var updatedProduct = await _repository.GetByIdAsync(1);
+            var result = await _repository.UpdateAsync(product);
 
             // Assert
-            Assert.Equal("Wijn", updatedProduct.Naam);
+            Assert.NotNull(result);
+            Assert.Equal("Updated Product", result.Naam);
         }
 
         [Fact]
-        public async Task DeleteAsync_RemovesProduct_WhenExists()
+        public async Task UpdateAsync_ThrowsException_WhenProductNotFound()
         {
             // Arrange
-            var product = new Product { Id = 1, Naam = "Bier", IsAlcohol = true };
-            await _repository.AddAsync(product);
+            var product = new Product
+            {
+                Id = 999,
+                Naam = "Nonexistent Product",
+                IsAlcohol = false,
+                Foto = "nonexistentphoto.jpg"
+            };
 
-            // Act
-            await _repository.DeleteAsync(1);
-            var result = await _repository.GetByIdAsync(1);
-
-            // Assert
-            Assert.Null(result);
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<Exception>(() => _repository.UpdateAsync(product));
+            Assert.Equal("Product not found", exception.Message);
         }
 
         [Fact]
-        public async Task DeleteAsync_DoesNothing_WhenDoesNotExist()
+        public async Task DeleteAsync_DeletesProduct_WhenExists()
         {
+            // Arrange
+            var product = new Product
+            {
+                Id = 1,
+                Naam = "Product to Delete",
+                IsAlcohol = false,
+                Foto = "deletephoto.jpg"
+            };
+            _context.Producten.Add(product);
+            await _context.SaveChangesAsync();
+
             // Act
-            await _repository.DeleteAsync(999);
+            await _repository.DeleteAsync(product.Id);
 
             // Assert
-            var allProducts = await _repository.GetAllAsync();
-            Assert.Empty(allProducts);
+            var exception = await Assert.ThrowsAsync<Exception>(() => _repository.GetByIdAsync(product.Id));
+            Assert.Equal("Product not found", exception.Message);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_ThrowsException_WhenProductNotFound()
+        {
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<Exception>(() => _repository.DeleteAsync(999));
+            Assert.Equal("Product not found", exception.Message);
         }
     }
 }

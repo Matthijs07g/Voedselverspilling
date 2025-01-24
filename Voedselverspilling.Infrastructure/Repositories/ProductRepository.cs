@@ -27,7 +27,11 @@ namespace Voedselverspilling.Infrastructure.Repositories
         public async Task<IEnumerable<Product>> GetAllAsync()
         {
             var products = await _context.Producten.ToListAsync();
-            return products ?? throw new Exception("No products found");
+            if(products.Count == 0 || products == null)
+            {
+                throw new Exception("No products found");
+            }
+            return products;
         }
 
         public async Task<Product> AddAsync(Product Product)
