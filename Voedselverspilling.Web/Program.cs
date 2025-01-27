@@ -9,12 +9,28 @@ using Voedselverspilling.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var connectionString = string.Empty;
+var connectionStringId = string.Empty;
+
+if (builder.Environment.IsDevelopment())
+{
+    connectionString = builder.Configuration.GetConnectionString("VoedselverspillingDbLocal");
+    connectionStringId = builder.Configuration.GetConnectionString("VoedselverspillingDbLocalId");
+}
+else
+{
+    connectionString = Environment.GetEnvironmentVariable("Voedselverspilling");
+    connectionStringId = Environment.GetEnvironmentVariable("VoedselverspillingId");
+}
+
+
 // Add your DbContext for Entity Framework
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("VoedselverspillingDbLocal")));
+    options.UseSqlServer(connectionString));
 
 builder.Services.AddDbContext<IdDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityDbLocal")));
+    options.UseSqlServer(connectionStringId));
+
 
 // Register Identity services
 builder.Services.AddIdentity<AppIdentity, IdentityRole>(options =>
